@@ -9,8 +9,7 @@
 body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',sans-serif; }
 
 header {
-  padding:16px 28px;
-  border-bottom:1px solid #21262d;
+  padding:16px 28px; border-bottom:1px solid #21262d;
   display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
 }
 header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
@@ -36,31 +35,38 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
 #search:focus { border-color:#58a6ff; }
 
 #legend {
-  padding:10px 28px; display:flex; gap:10px; flex-wrap:wrap;
+  padding:10px 28px; display:flex; gap:8px; flex-wrap:wrap;
   border-bottom:1px solid #21262d; align-items:center;
 }
 .legend-item {
   display:flex; align-items:center; gap:5px; font-size:12px; color:#8b949e;
   padding:3px 10px; border-radius:12px; border:1px solid #21262d;
-  cursor:pointer; transition:all 0.2s;
+  cursor:pointer; transition:all 0.2s; user-select:none;
 }
 .legend-item:hover, .legend-item.active { border-color:var(--c); color:#e6edf3; }
 .legend-dot { width:10px; height:10px; border-radius:50%; background:var(--c); flex-shrink:0; }
+#group-manage-btn {
+  padding:4px 12px; border-radius:12px; border:1px solid #30363d;
+  background:#161b22; color:#8b949e; cursor:pointer; font-size:12px; margin-left:auto;
+  transition:all 0.2s;
+}
+#group-manage-btn:hover { border-color:#3fb950; color:#3fb950; }
 
 #bubble-container {
   padding:24px 28px; min-height:300px;
   display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start; align-content:flex-start;
 }
-
 .bubble {
   border-radius:8px; display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:all 0.2s; font-weight:600; text-align:center;
-  padding:8px; flex-shrink:0;
+  cursor:grab; transition:transform 0.15s, filter 0.15s; font-weight:600; text-align:center;
+  padding:8px; flex-shrink:0; user-select:none;
 }
-.bubble:hover { transform:scale(1.08); z-index:10; filter:brightness(1.15); }
-.bubble .kw-name { display:block; }
-.bubble .kw-count { display:block; font-size:0.72em; opacity:0.75; margin-top:2px; }
+.bubble:hover { filter:brightness(1.15); }
+.bubble.dragging { opacity:0.4; cursor:grabbing; transform:scale(0.95); }
+.bubble .kw-name { display:block; pointer-events:none; }
+.bubble .kw-count { display:block; font-size:0.72em; opacity:0.75; margin-top:2px; pointer-events:none; }
 
+/* 뉴스 모달 */
 #modal-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
   z-index:100; align-items:center; justify-content:center;
@@ -76,9 +82,7 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
 }
 #modal-title { font-size:17px; font-weight:700; margin-bottom:3px; }
 #modal-meta { font-size:12px; color:#8b949e; }
-#modal-close {
-  cursor:pointer; font-size:18px; color:#8b949e; background:none; border:none; padding:2px 6px;
-}
+#modal-close { cursor:pointer; font-size:18px; color:#8b949e; background:none; border:none; padding:2px 6px; }
 #modal-close:hover { color:#e6edf3; }
 #modal-body { padding:14px 22px; overflow-y:auto; }
 .news-card {
@@ -95,6 +99,98 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
   font-size:12px; color:#3fb950; margin-top:8px; padding-top:8px;
   border-top:1px solid #21262d; line-height:1.5;
 }
+
+/* 그룹 관리 모달 */
+#gmodal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  z-index:200; align-items:flex-start; justify-content:center; padding-top:40px;
+}
+#gmodal-overlay.show { display:flex; }
+#gmodal {
+  background:#161b22; border:1px solid #30363d; border-radius:12px;
+  width:900px; max-width:98vw; max-height:88vh; display:flex; flex-direction:column;
+}
+#gmodal-header {
+  padding:16px 20px; border-bottom:1px solid #21262d;
+  display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
+}
+#gmodal-header h2 { font-size:16px; font-weight:600; }
+#gmodal-header span { font-size:12px; color:#8b949e; margin-left:10px; }
+#gmodal-close { cursor:pointer; font-size:18px; color:#8b949e; background:none; border:none; }
+#gmodal-body {
+  display:flex; gap:0; flex:1; overflow:hidden;
+}
+
+/* 왼쪽: 미분류 키워드 */
+#unassigned-panel {
+  width:260px; flex-shrink:0; border-right:1px solid #21262d;
+  display:flex; flex-direction:column;
+}
+#unassigned-panel h3 {
+  padding:12px 16px; font-size:13px; color:#8b949e; border-bottom:1px solid #21262d; flex-shrink:0;
+}
+#unassigned-pool {
+  padding:12px; display:flex; flex-wrap:wrap; gap:6px;
+  overflow-y:auto; flex:1;
+  min-height:100px;
+}
+#unassigned-pool.drag-over { background:#1f2937; border-radius:8px; }
+
+/* 오른쪽: 그룹 목록 */
+#groups-panel {
+  flex:1; display:flex; flex-direction:column; overflow:hidden;
+}
+#groups-scroll { flex:1; overflow-y:auto; padding:12px 16px; }
+
+/* 새 그룹 만들기 */
+#new-group-bar {
+  padding:12px 16px; border-top:1px solid #21262d; display:flex; gap:8px; align-items:center; flex-shrink:0;
+}
+#new-group-input {
+  flex:1; padding:6px 12px; border-radius:6px; border:1px solid #30363d;
+  background:#0d1117; color:#e6edf3; font-size:13px; outline:none;
+}
+#new-group-input:focus { border-color:#58a6ff; }
+#new-group-color { width:36px; height:32px; border:none; border-radius:6px; cursor:pointer; padding:2px; }
+#new-group-add {
+  padding:6px 14px; border-radius:6px; border:none; background:#238636;
+  color:#fff; cursor:pointer; font-size:13px; font-weight:600; white-space:nowrap;
+}
+#new-group-add:hover { background:#2ea043; }
+
+/* 그룹 카드 */
+.group-card {
+  border:1px solid #21262d; border-radius:8px; margin-bottom:10px; overflow:hidden;
+}
+.group-card-header {
+  padding:10px 14px; display:flex; align-items:center; gap:8px; background:#0d1117;
+}
+.group-color-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+.group-card-name { font-size:13px; font-weight:600; flex:1; }
+.group-card-count { font-size:11px; color:#8b949e; }
+.group-delete-btn {
+  background:none; border:none; color:#8b949e; cursor:pointer; font-size:14px; padding:2px 6px;
+}
+.group-delete-btn:hover { color:#f85149; }
+.group-drop-zone {
+  padding:10px 12px; min-height:52px; display:flex; flex-wrap:wrap; gap:6px;
+  transition:background 0.15s;
+}
+.group-drop-zone.drag-over { background:#1f2937; }
+.group-drop-zone.empty::after {
+  content:'여기에 키워드를 드래그하세요';
+  color:#30363d; font-size:12px; align-self:center;
+}
+
+/* 키워드 칩 */
+.kw-chip {
+  padding:4px 10px; border-radius:12px; font-size:12px; font-weight:500;
+  cursor:grab; user-select:none; transition:opacity 0.15s; white-space:nowrap;
+  border:1px solid transparent;
+}
+.kw-chip:active { cursor:grabbing; }
+.kw-chip.dragging { opacity:0.3; }
+
 #loading { text-align:center; padding:60px; color:#8b949e; font-size:14px; }
 </style>
 </head>
@@ -114,34 +210,74 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
   <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
   <button class="filter-btn" onclick="setFilter('top20',this)">TOP 20</button>
   <button class="filter-btn" onclick="setFilter('top50',this)">TOP 50</button>
-  <input id="search" type="text" placeholder="키워드 검색..." oninput="filterSearch(this.value)">
+  <input id="search" type="text" placeholder="키워드 검색..." oninput="renderBubbles(filtered())">
 </div>
 
-<div id="legend"></div>
+<div id="legend">
+  <button id="group-manage-btn" onclick="openGmodal()">🗂 그룹 관리</button>
+</div>
 
 <div id="bubble-container">
   <div id="loading">⏳ 데이터 불러오는 중...</div>
 </div>
 
-<div id="modal-overlay" onclick="closeBgModal(event)">
+<!-- 뉴스 모달 -->
+<div id="modal-overlay" onclick="if(event.target===this)closeNewsModal()">
   <div id="modal">
     <div id="modal-header">
-      <div>
-        <div id="modal-title"></div>
-        <div id="modal-meta"></div>
-      </div>
+      <div><div id="modal-title"></div><div id="modal-meta"></div></div>
       <button id="modal-close" onclick="closeNewsModal()">✕</button>
     </div>
     <div id="modal-body"></div>
   </div>
 </div>
 
+<!-- 그룹 관리 모달 -->
+<div id="gmodal-overlay" onclick="if(event.target===this)closeGmodal()">
+  <div id="gmodal">
+    <div id="gmodal-header">
+      <div>
+        <h2>🗂 그룹 관리</h2>
+        <span>키워드를 드래그해서 그룹에 넣으세요</span>
+      </div>
+      <button id="gmodal-close" onclick="closeGmodal()">✕</button>
+    </div>
+    <div id="gmodal-body">
+      <div id="unassigned-panel">
+        <h3>미분류 키워드</h3>
+        <div id="unassigned-pool"></div>
+      </div>
+      <div id="groups-panel">
+        <div id="groups-scroll"></div>
+        <div id="new-group-bar">
+          <input id="new-group-input" placeholder="새 그룹 이름..." onkeydown="if(event.key==='Enter')addGroup()">
+          <input type="color" id="new-group-color" value="#58a6ff">
+          <button id="new-group-add" onclick="addGroup()">+ 그룹 추가</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+// ── 상태 ──────────────────────────────────────────
 let allKeywords = [];
 let groupColors = {};
 let currentFilter = 'all';
 let activeGroup = null;
+let dragKw = null; // 현재 드래그 중인 키워드명
 
+// localStorage 키
+const LS_GROUPS = 'ntt_groups'; // { groupName: { color, keywords:[] } }
+
+function loadGroups() {
+  try { return JSON.parse(localStorage.getItem(LS_GROUPS)) || {}; } catch { return {}; }
+}
+function saveGroups(groups) {
+  localStorage.setItem(LS_GROUPS, JSON.stringify(groups));
+}
+
+// ── 데이터 로드 ───────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch("news_db.json");
@@ -152,10 +288,24 @@ async function loadData() {
     document.getElementById('stat-keywords').textContent = db.total_keywords;
     document.getElementById('updated-at').textContent = '업데이트: ' + db.updated_at;
 
+    // 자동 그룹 색상 (build_db.py 제공)
     groupColors = db.group_colors || {};
 
+    // localStorage 수동 그룹 색상 병합
+    const manualGroups = loadGroups();
+    Object.entries(manualGroups).forEach(([g, data]) => {
+      groupColors[g] = data.color;
+    });
+
     allKeywords = Object.entries(db.keywords || {})
-      .map(([name, data]) => ({ name, count: data.count, group: data.group, articles: data.articles }))
+      .map(([name, data]) => {
+        // 수동 그룹 우선 적용
+        let group = data.group;
+        for (const [g, gdata] of Object.entries(manualGroups)) {
+          if (gdata.keywords.includes(name)) { group = g; break; }
+        }
+        return { name, count: data.count, group, articles: data.articles };
+      })
       .sort((a, b) => b.count - a.count);
 
     renderLegend();
@@ -166,6 +316,7 @@ async function loadData() {
   }
 }
 
+// ── 필터 ─────────────────────────────────────────
 function filtered() {
   let kws = [...allKeywords];
   const q = document.getElementById('search').value;
@@ -176,16 +327,27 @@ function filtered() {
   return kws;
 }
 
+function setFilter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBubbles(filtered());
+}
+
+// ── 범례 ─────────────────────────────────────────
 function renderLegend() {
   const legend = document.getElementById('legend');
-  const usedGroups = [...new Set(allKeywords.map(k => k.group))];
-  legend.innerHTML = usedGroups.map(g => {
+  const usedGroups = [...new Set(allKeywords.map(k => k.group))].filter(Boolean);
+  const items = usedGroups.map(g => {
     const color = groupColors[g] || '#8b949e';
     const count = allKeywords.filter(k => k.group === g).length;
     return `<div class="legend-item ${activeGroup===g?'active':''}" style="--c:${color}" onclick="toggleGroup('${escJs(g)}')">
       <div class="legend-dot"></div>${g} <span style="opacity:.6">(${count})</span>
     </div>`;
   }).join('');
+  const btn = document.getElementById('group-manage-btn').outerHTML;
+  legend.innerHTML = items + btn;
+  document.getElementById('group-manage-btn').onclick = openGmodal;
 }
 
 function toggleGroup(g) {
@@ -194,11 +356,11 @@ function toggleGroup(g) {
   renderBubbles(filtered());
 }
 
+// ── 버블 렌더 ─────────────────────────────────────
 function renderBubbles(keywords) {
   const container = document.getElementById('bubble-container');
   if (!keywords.length) { container.innerHTML = '<div id="loading">검색 결과가 없어요.</div>'; return; }
-  const maxC = keywords[0].count;
-  const minC = keywords[keywords.length-1].count;
+  const maxC = keywords[0].count, minC = keywords[keywords.length-1].count;
 
   container.innerHTML = keywords.map(kw => {
     const ratio = maxC === minC ? 0.5 : (kw.count - minC) / (maxC - minC);
@@ -206,11 +368,12 @@ function renderBubbles(keywords) {
     const fontSize = Math.round(11 + ratio * 7);
     const color = groupColors[kw.group] || '#8b949e';
     const alpha = Math.round(30 + ratio * 55).toString(16).padStart(2,'0');
-
     return `<div class="bubble"
-         style="width:${size}px;height:${size}px;font-size:${fontSize}px;
-                background:${color+alpha};border:1.5px solid ${color}99;color:#e6edf3;"
-         onclick="showModal('${escJs(kw.name)}')">
+      style="width:${size}px;height:${size}px;font-size:${fontSize}px;background:${color+alpha};border:1.5px solid ${color}99;color:#e6edf3;"
+      draggable="true"
+      ondragstart="onBubbleDragStart(event,'${escJs(kw.name)}')"
+      ondragend="onBubbleDragEnd(event)"
+      onclick="showModal('${escJs(kw.name)}')">
       <div>
         <span class="kw-name">${kw.name}</span>
         <span class="kw-count">${kw.count}회</span>
@@ -219,34 +382,139 @@ function renderBubbles(keywords) {
   }).join('');
 }
 
-function setFilter(type, btn) {
-  currentFilter = type;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderBubbles(filtered());
-}
-
-function filterSearch() { renderBubbles(filtered()); }
-
+// ── 뉴스 모달 ─────────────────────────────────────
 function showModal(name) {
   const kw = allKeywords.find(k => k.name === name);
   if (!kw) return;
   const color = groupColors[kw.group] || '#8b949e';
   document.getElementById('modal-title').innerHTML = `<span style="color:${color}">#</span> ${name}`;
-  document.getElementById('modal-meta').textContent = `${kw.group} · 총 ${kw.count}회 언급 · ${kw.articles.length}건`;
+  document.getElementById('modal-meta').textContent = `${kw.group||'미분류'} · 총 ${kw.count}회 언급 · ${kw.articles.length}건`;
   document.getElementById('modal-body').innerHTML = kw.articles.map(a => `
     <div class="news-card">
-      <div class="card-title">${a.url ? `<a href="${a.url}" target="_blank">🔗 ${a.title}</a>` : a.title}</div>
+      <div class="card-title">${a.url?`<a href="${a.url}" target="_blank">🔗 ${a.title}</a>`:a.title}</div>
       <div class="card-date">📅 ${a.date}</div>
       <div class="card-summary">${(a.summary||'').replace(/\n/g,'<br>')}</div>
-      ${a.insight ? `<div class="card-insight">📈 ${(a.insight||'').replace(/\n/g,'<br>')}</div>` : ''}
+      ${a.insight?`<div class="card-insight">📈 ${(a.insight||'').replace(/\n/g,'<br>')}</div>`:''}
     </div>`).join('');
   document.getElementById('modal-overlay').classList.add('show');
 }
-
 function closeNewsModal() { document.getElementById('modal-overlay').classList.remove('show'); }
-function closeBgModal(e) { if(e.target===document.getElementById('modal-overlay')) closeNewsModal(); }
-function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+
+// ── 그룹 관리 모달 ───────────────────────────────
+function openGmodal() {
+  renderGmodal();
+  document.getElementById('gmodal-overlay').classList.add('show');
+}
+function closeGmodal() {
+  document.getElementById('gmodal-overlay').classList.remove('show');
+  loadData(); // 변경사항 반영
+}
+
+function renderGmodal() {
+  const groups = loadGroups();
+  const assignedKws = new Set(Object.values(groups).flatMap(g => g.keywords));
+
+  // 미분류 키워드
+  const pool = document.getElementById('unassigned-pool');
+  const unassigned = allKeywords.filter(k => !assignedKws.has(k.name));
+  pool.innerHTML = unassigned.length
+    ? unassigned.map(k => chipHtml(k.name, groupColors[k.group] || '#8b949e')).join('')
+    : '<span style="font-size:12px;color:#30363d">모두 그룹에 배정됨</span>';
+
+  // 드롭존 (미분류로 되돌리기)
+  pool.ondragover = e => { e.preventDefault(); pool.classList.add('drag-over'); };
+  pool.ondragleave = () => pool.classList.remove('drag-over');
+  pool.ondrop = e => {
+    e.preventDefault(); pool.classList.remove('drag-over');
+    if (!dragKw) return;
+    // 모든 그룹에서 제거
+    const groups = loadGroups();
+    Object.values(groups).forEach(g => { g.keywords = g.keywords.filter(k => k !== dragKw); });
+    saveGroups(groups);
+    renderGmodal();
+  };
+
+  // 그룹 카드
+  const scroll = document.getElementById('groups-scroll');
+  scroll.innerHTML = Object.entries(groups).map(([gname, gdata]) => `
+    <div class="group-card" id="gc-${escId(gname)}">
+      <div class="group-card-header">
+        <div class="group-color-dot" style="background:${gdata.color}"></div>
+        <div class="group-card-name">${gname}</div>
+        <div class="group-card-count">${gdata.keywords.length}개</div>
+        <button class="group-delete-btn" onclick="deleteGroup('${escJs(gname)}')">🗑</button>
+      </div>
+      <div class="group-drop-zone ${gdata.keywords.length===0?'empty':''}"
+           id="dz-${escId(gname)}"
+           ondragover="dzOver(event,this)"
+           ondragleave="dzLeave(this)"
+           ondrop="dzDrop(event,'${escJs(gname)}')">
+        ${gdata.keywords.map(k => chipHtml(k, gdata.color)).join('')}
+      </div>
+    </div>`).join('');
+
+  // 칩 이벤트 재등록
+  document.querySelectorAll('.kw-chip').forEach(el => {
+    el.ondragstart = e => { dragKw = el.dataset.kw; el.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; };
+    el.ondragend = () => { dragKw = null; el.classList.remove('dragging'); };
+  });
+}
+
+function chipHtml(name, color) {
+  const bg = color + '33';
+  return `<div class="kw-chip" data-kw="${escJs(name)}" draggable="true"
+    style="background:${bg};border-color:${color};color:#e6edf3">${name}</div>`;
+}
+
+function dzOver(e, el) { e.preventDefault(); el.classList.add('drag-over'); }
+function dzLeave(el) { el.classList.remove('drag-over'); }
+function dzDrop(e, gname) {
+  e.preventDefault();
+  document.querySelectorAll('.group-drop-zone').forEach(el => el.classList.remove('drag-over'));
+  if (!dragKw) return;
+  const groups = loadGroups();
+  // 다른 그룹에서 제거
+  Object.values(groups).forEach(g => { g.keywords = g.keywords.filter(k => k !== dragKw); });
+  // 이 그룹에 추가
+  if (!groups[gname].keywords.includes(dragKw)) groups[gname].keywords.push(dragKw);
+  saveGroups(groups);
+  renderGmodal();
+}
+
+function addGroup() {
+  const name = document.getElementById('new-group-input').value.trim();
+  const color = document.getElementById('new-group-color').value;
+  if (!name) return;
+  const groups = loadGroups();
+  if (groups[name]) return alert('이미 있는 그룹 이름이에요.');
+  groups[name] = { color, keywords: [] };
+  saveGroups(groups);
+  groupColors[name] = color;
+  document.getElementById('new-group-input').value = '';
+  renderGmodal();
+}
+
+function deleteGroup(name) {
+  if (!confirm(`"${name}" 그룹을 삭제할까요?`)) return;
+  const groups = loadGroups();
+  delete groups[name];
+  saveGroups(groups);
+  renderGmodal();
+}
+
+// 버블에서 그룹 모달로 드래그
+function onBubbleDragStart(e, name) {
+  dragKw = name;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onBubbleDragEnd(e) {
+  dragKw = null;
+  e.target.classList.remove('dragging');
+}
+
+function escJs(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+function escId(s) { return String(s).replace(/[^a-zA-Z0-9가-힣]/g,'_'); }
 
 loadData();
 </script>
