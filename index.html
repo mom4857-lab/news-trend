@@ -14,16 +14,7 @@ header {
   display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
 }
 header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
-.header-right { display:flex; align-items:center; gap:10px; }
 #updated-at { font-size:12px; color:#8b949e; }
-
-#refresh-btn {
-  padding:6px 14px; border-radius:6px; border:1px solid #30363d;
-  background:#161b22; color:#e6edf3; cursor:pointer; font-size:13px;
-  display:flex; align-items:center; gap:6px; transition:all 0.2s;
-}
-#refresh-btn:hover { border-color:#58a6ff; color:#58a6ff; }
-#refresh-btn.loading { opacity:0.6; pointer-events:none; }
 
 #stats { display:flex; gap:20px; padding:12px 28px; border-bottom:1px solid #21262d; }
 .stat .num { font-size:22px; font-weight:700; color:#58a6ff; }
@@ -44,10 +35,9 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
 }
 #search:focus { border-color:#58a6ff; }
 
-/* 그룹 범례 */
 #legend {
   padding:10px 28px; display:flex; gap:10px; flex-wrap:wrap;
-  border-bottom:1px solid #21262d;
+  border-bottom:1px solid #21262d; align-items:center;
 }
 .legend-item {
   display:flex; align-items:center; gap:5px; font-size:12px; color:#8b949e;
@@ -56,13 +46,6 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
 }
 .legend-item:hover, .legend-item.active { border-color:var(--c); color:#e6edf3; }
 .legend-dot { width:10px; height:10px; border-radius:50%; background:var(--c); flex-shrink:0; }
-
-/* 수동 그룹 버튼 */
-#group-btn {
-  margin-left:auto; padding:5px 14px; border-radius:6px; border:1px solid #30363d;
-  background:#161b22; color:#8b949e; cursor:pointer; font-size:12px; transition:all 0.2s;
-}
-#group-btn:hover { border-color:#3fb950; color:#3fb950; }
 
 #bubble-container {
   padding:24px 28px; min-height:300px;
@@ -78,7 +61,6 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
 .bubble .kw-name { display:block; }
 .bubble .kw-count { display:block; font-size:0.72em; opacity:0.75; margin-top:2px; }
 
-/* 뉴스 모달 */
 #modal-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
   z-index:100; align-items:center; justify-content:center;
@@ -113,61 +95,6 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
   font-size:12px; color:#3fb950; margin-top:8px; padding-top:8px;
   border-top:1px solid #21262d; line-height:1.5;
 }
-
-/* 수동 그룹 모달 */
-#group-modal-overlay {
-  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
-  z-index:200; align-items:center; justify-content:center;
-}
-#group-modal-overlay.show { display:flex; }
-#group-modal {
-  background:#161b22; border:1px solid #30363d; border-radius:12px;
-  width:600px; max-width:95vw; max-height:80vh; display:flex; flex-direction:column;
-}
-#group-modal-header {
-  padding:16px 20px; border-bottom:1px solid #21262d;
-  display:flex; justify-content:space-between; align-items:center;
-}
-#group-modal-header h2 { font-size:16px; font-weight:600; }
-#group-modal-close {
-  cursor:pointer; font-size:18px; color:#8b949e; background:none; border:none;
-}
-#group-modal-body { padding:16px 20px; overflow-y:auto; }
-
-.group-form { margin-bottom:20px; padding:14px; background:#0d1117; border-radius:8px; border:1px solid #21262d; }
-.group-form h3 { font-size:13px; color:#8b949e; margin-bottom:10px; }
-.form-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; flex-wrap:wrap; }
-.form-input {
-  padding:6px 12px; border-radius:6px; border:1px solid #30363d;
-  background:#161b22; color:#e6edf3; font-size:13px; flex:1; outline:none; min-width:120px;
-}
-.form-input:focus { border-color:#58a6ff; }
-.color-input { width:40px; height:32px; border:none; border-radius:6px; cursor:pointer; padding:2px; }
-.form-btn {
-  padding:6px 14px; border-radius:6px; border:none; cursor:pointer; font-size:13px; font-weight:600;
-}
-.btn-green { background:#238636; color:#fff; }
-.btn-green:hover { background:#2ea043; }
-.btn-red { background:#da3633; color:#fff; }
-.btn-red:hover { background:#f85149; }
-
-.kw-selector { display:flex; flex-wrap:wrap; gap:6px; max-height:150px; overflow-y:auto; margin-top:8px; }
-.kw-chip {
-  padding:3px 10px; border-radius:12px; border:1px solid #30363d;
-  font-size:12px; cursor:pointer; transition:all 0.15s; user-select:none;
-}
-.kw-chip.selected { background:#58a6ff; color:#0d1117; border-color:#58a6ff; }
-.kw-chip:hover { border-color:#58a6ff; }
-
-.existing-group {
-  padding:10px 14px; background:#0d1117; border-radius:8px; border:1px solid #21262d;
-  margin-bottom:8px; display:flex; align-items:center; gap:10px;
-}
-.eg-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-.eg-info { flex:1; }
-.eg-name { font-size:13px; font-weight:600; }
-.eg-kws { font-size:11px; color:#8b949e; margin-top:2px; }
-
 #loading { text-align:center; padding:60px; color:#8b949e; font-size:14px; }
 </style>
 </head>
@@ -175,10 +102,7 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
 
 <header>
   <h1>📊 뉴스 키워드 트렌드</h1>
-  <div class="header-right">
-    <span id="updated-at"></span>
-    <button id="refresh-btn" onclick="refreshData()">🔄 새로고침</button>
-  </div>
+  <span id="updated-at"></span>
 </header>
 
 <div id="stats">
@@ -193,15 +117,12 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
   <input id="search" type="text" placeholder="키워드 검색..." oninput="filterSearch(this.value)">
 </div>
 
-<div id="legend">
-  <button id="group-btn" onclick="openGroupModal()">＋ 그룹 관리</button>
-</div>
+<div id="legend"></div>
 
 <div id="bubble-container">
   <div id="loading">⏳ 데이터 불러오는 중...</div>
 </div>
 
-<!-- 뉴스 모달 -->
 <div id="modal-overlay" onclick="closeBgModal(event)">
   <div id="modal">
     <div id="modal-header">
@@ -215,39 +136,15 @@ header h1 { font-size:18px; font-weight:700; color:#e6edf3; }
   </div>
 </div>
 
-<!-- 수동 그룹 모달 -->
-<div id="group-modal-overlay" onclick="closeGroupBg(event)">
-  <div id="group-modal">
-    <div id="group-modal-header">
-      <h2>🗂️ 그룹 관리</h2>
-      <button id="group-modal-close" onclick="closeGroupModal()">✕</button>
-    </div>
-    <div id="group-modal-body">
-      <div class="group-form">
-        <h3>새 그룹 만들기</h3>
-        <div class="form-row">
-          <input class="form-input" id="new-group-name" placeholder="그룹 이름 (예: 바이오/헬스케어)">
-          <input class="color-input" type="color" id="new-group-color" value="#f0883e">
-          <button class="form-btn btn-green" onclick="createGroup()">추가</button>
-        </div>
-        <div style="font-size:12px;color:#8b949e;margin-bottom:6px;">키워드 선택 (클릭으로 추가/제거):</div>
-        <div class="kw-selector" id="kw-selector"></div>
-      </div>
-      <div id="existing-groups"></div>
-    </div>
-  </div>
-</div>
-
 <script>
 let allKeywords = [];
 let groupColors = {};
 let currentFilter = 'all';
 let activeGroup = null;
-let selectedKws = new Set();
 
 async function loadData() {
   try {
-    const res = await fetch('/api/data');
+    const res = await fetch("news_db.json");
     if (!res.ok) throw new Error();
     const db = await res.json();
 
@@ -265,7 +162,7 @@ async function loadData() {
     renderBubbles(filtered());
   } catch(e) {
     document.getElementById('bubble-container').innerHTML =
-      '<div id="loading" style="color:#f85149">❌ build_db.py를 먼저 실행해주세요.</div>';
+      '<div id="loading" style="color:#f85149">❌ news_db.json을 GitHub에 업로드해주세요.</div>';
   }
 }
 
@@ -281,22 +178,14 @@ function filtered() {
 
 function renderLegend() {
   const legend = document.getElementById('legend');
-  const groupBtn = document.getElementById('group-btn');
-
-  // 존재하는 그룹만 표시
   const usedGroups = [...new Set(allKeywords.map(k => k.group))];
-  const items = usedGroups.map(g => {
+  legend.innerHTML = usedGroups.map(g => {
     const color = groupColors[g] || '#8b949e';
     const count = allKeywords.filter(k => k.group === g).length;
-    return `<div class="legend-item ${activeGroup===g?'active':''}"
-               style="--c:${color}"
-               onclick="toggleGroup('${escJs(g)}')">
+    return `<div class="legend-item ${activeGroup===g?'active':''}" style="--c:${color}" onclick="toggleGroup('${escJs(g)}')">
       <div class="legend-dot"></div>${g} <span style="opacity:.6">(${count})</span>
     </div>`;
   }).join('');
-
-  legend.innerHTML = items + groupBtn.outerHTML;
-  document.getElementById('group-btn').onclick = openGroupModal;
 }
 
 function toggleGroup(g) {
@@ -307,10 +196,7 @@ function toggleGroup(g) {
 
 function renderBubbles(keywords) {
   const container = document.getElementById('bubble-container');
-  if (!keywords.length) {
-    container.innerHTML = '<div id="loading">검색 결과가 없어요.</div>';
-    return;
-  }
+  if (!keywords.length) { container.innerHTML = '<div id="loading">검색 결과가 없어요.</div>'; return; }
   const maxC = keywords[0].count;
   const minC = keywords[keywords.length-1].count;
 
@@ -320,12 +206,10 @@ function renderBubbles(keywords) {
     const fontSize = Math.round(11 + ratio * 7);
     const color = groupColors[kw.group] || '#8b949e';
     const alpha = Math.round(30 + ratio * 55).toString(16).padStart(2,'0');
-    const bg = color + alpha;
-    const border = color + '99';
 
     return `<div class="bubble"
          style="width:${size}px;height:${size}px;font-size:${fontSize}px;
-                background:${bg};border:1.5px solid ${border};color:#e6edf3;"
+                background:${color+alpha};border:1.5px solid ${color}99;color:#e6edf3;"
          onclick="showModal('${escJs(kw.name)}')">
       <div>
         <span class="kw-name">${kw.name}</span>
@@ -342,21 +226,17 @@ function setFilter(type, btn) {
   renderBubbles(filtered());
 }
 
-function filterSearch(q) { renderBubbles(filtered()); }
+function filterSearch() { renderBubbles(filtered()); }
 
 function showModal(name) {
   const kw = allKeywords.find(k => k.name === name);
   if (!kw) return;
   const color = groupColors[kw.group] || '#8b949e';
-  document.getElementById('modal-title').innerHTML =
-    `<span style="color:${color}">#</span> ${name}`;
-  document.getElementById('modal-meta').textContent =
-    `${kw.group} · 총 ${kw.count}회 언급 · ${kw.articles.length}건`;
+  document.getElementById('modal-title').innerHTML = `<span style="color:${color}">#</span> ${name}`;
+  document.getElementById('modal-meta').textContent = `${kw.group} · 총 ${kw.count}회 언급 · ${kw.articles.length}건`;
   document.getElementById('modal-body').innerHTML = kw.articles.map(a => `
     <div class="news-card">
-      <div class="card-title">
-        ${a.url ? `<a href="${a.url}" target="_blank">🔗 ${a.title}</a>` : a.title}
-      </div>
+      <div class="card-title">${a.url ? `<a href="${a.url}" target="_blank">🔗 ${a.title}</a>` : a.title}</div>
       <div class="card-date">📅 ${a.date}</div>
       <div class="card-summary">${(a.summary||'').replace(/\n/g,'<br>')}</div>
       ${a.insight ? `<div class="card-insight">📈 ${(a.insight||'').replace(/\n/g,'<br>')}</div>` : ''}
@@ -366,108 +246,6 @@ function showModal(name) {
 
 function closeNewsModal() { document.getElementById('modal-overlay').classList.remove('show'); }
 function closeBgModal(e) { if(e.target===document.getElementById('modal-overlay')) closeNewsModal(); }
-
-// 새로고침
-async function refreshData() {
-  const btn = document.getElementById('refresh-btn');
-  btn.classList.add('loading');
-  btn.textContent = '⏳ 갱신 중...';
-  try {
-    const res = await fetch('/api/refresh', {method:'POST'});
-    const data = await res.json();
-    if (data.success) {
-      await loadData();
-      btn.textContent = '✅ 완료!';
-      setTimeout(() => { btn.textContent = '🔄 새로고침'; btn.classList.remove('loading'); }, 1500);
-    } else {
-      btn.textContent = '❌ 실패';
-      setTimeout(() => { btn.textContent = '🔄 새로고침'; btn.classList.remove('loading'); }, 2000);
-    }
-  } catch(e) {
-    btn.textContent = '❌ 오류';
-    setTimeout(() => { btn.textContent = '🔄 새로고침'; btn.classList.remove('loading'); }, 2000);
-  }
-}
-
-// 그룹 모달
-function openGroupModal() {
-  selectedKws.clear();
-  renderKwSelector();
-  renderExistingGroups();
-  document.getElementById('group-modal-overlay').classList.add('show');
-}
-function closeGroupModal() { document.getElementById('group-modal-overlay').classList.remove('show'); }
-function closeGroupBg(e) { if(e.target===document.getElementById('group-modal-overlay')) closeGroupModal(); }
-
-function renderKwSelector() {
-  const sel = document.getElementById('kw-selector');
-  sel.innerHTML = allKeywords.map(k =>
-    `<div class="kw-chip ${selectedKws.has(k.name)?'selected':''}"
-          onclick="toggleKw('${escJs(k.name)}')">${k.name}</div>`
-  ).join('');
-}
-
-function toggleKw(name) {
-  if (selectedKws.has(name)) selectedKws.delete(name);
-  else selectedKws.add(name);
-  renderKwSelector();
-}
-
-async function createGroup() {
-  const name = document.getElementById('new-group-name').value.trim();
-  const color = document.getElementById('new-group-color').value;
-  if (!name) return alert('그룹 이름을 입력해주세요.');
-  if (selectedKws.size === 0) return alert('키워드를 하나 이상 선택해주세요.');
-
-  const res = await fetch('/api/manual_group', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({group_name: name, keywords: [...selectedKws], color})
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById('new-group-name').value = '';
-    selectedKws.clear();
-    await loadData();
-    renderKwSelector();
-    renderExistingGroups();
-  }
-}
-
-function renderExistingGroups() {
-  const container = document.getElementById('existing-groups');
-  const manualGroups = Object.entries(groupColors)
-    .filter(([g]) => !['기업','반도체/하드웨어','AI/소프트웨어','거시경제/정책','안보/지정학','웨어러블/모바일','기타'].includes(g));
-
-  if (!manualGroups.length) {
-    container.innerHTML = '<div style="font-size:13px;color:#8b949e;text-align:center;padding:12px">수동으로 만든 그룹이 없어요.</div>';
-    return;
-  }
-
-  container.innerHTML = '<div style="font-size:12px;color:#8b949e;margin-bottom:8px">수동 그룹 목록</div>' +
-    manualGroups.map(([g, c]) => {
-      const kws = allKeywords.filter(k => k.group === g).map(k => k.name).join(', ');
-      return `<div class="existing-group">
-        <div class="eg-dot" style="background:${c}"></div>
-        <div class="eg-info">
-          <div class="eg-name">${g}</div>
-          <div class="eg-kws">${kws || '키워드 없음'}</div>
-        </div>
-        <button class="form-btn btn-red" onclick="deleteGroup('${escJs(g)}')">삭제</button>
-      </div>`;
-    }).join('');
-}
-
-async function deleteGroup(name) {
-  if (!confirm(`"${name}" 그룹을 삭제할까요?`)) return;
-  const res = await fetch(`/api/manual_group/${encodeURIComponent(name)}`, {method:'DELETE'});
-  const data = await res.json();
-  if (data.success) {
-    await loadData();
-    renderExistingGroups();
-  }
-}
-
 function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
 
 loadData();
