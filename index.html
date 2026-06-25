@@ -6,14 +6,13 @@
 <title>뉴스 키워드 트렌드</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',sans-serif; overflow-x:hidden; }
+body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',sans-serif; }
 
 header {
   padding:10px 20px; border-bottom:1px solid #21262d;
-  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
 }
 header h1 { font-size:16px; font-weight:700; }
-.header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 #updated-at { font-size:11px; color:#8b949e; }
 
 #stats { display:flex; gap:16px; padding:8px 20px; border-bottom:1px solid #21262d; align-items:center; }
@@ -21,102 +20,86 @@ header h1 { font-size:16px; font-weight:700; }
 .stat .num { font-size:18px; font-weight:700; color:#58a6ff; }
 .stat .label { font-size:11px; color:#8b949e; }
 
+/* 툴바 */
 #toolbar {
-  padding:8px 20px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-  border-bottom:1px solid #21262d; background:#0d1117;
+  padding:8px 20px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+  border-bottom:1px solid #21262d;
 }
 .filter-btn {
   padding:3px 10px; border-radius:20px; border:1px solid #30363d;
   background:#161b22; color:#8b949e; cursor:pointer; font-size:11px; transition:all 0.2s;
+  white-space:nowrap;
 }
-.filter-btn.active,.filter-btn:hover { background:#58a6ff; color:#0d1117; border-color:#58a6ff; }
+.filter-btn.active { background:#58a6ff; color:#0d1117; border-color:#58a6ff; }
+.filter-btn:hover:not(.active) { border-color:#58a6ff; color:#58a6ff; }
+.group-filter-btn {
+  padding:3px 10px; border-radius:20px; border:1px solid transparent;
+  background:transparent; cursor:pointer; font-size:11px; transition:all 0.2s;
+  white-space:nowrap; font-weight:600;
+}
+.group-filter-btn.active { opacity:1 !important; }
+.group-filter-btn:not(.active) { opacity:0.45; }
+.group-filter-btn:hover { opacity:1 !important; }
 #search {
   padding:3px 10px; border-radius:20px; border:1px solid #30363d;
-  background:#161b22; color:#e6edf3; font-size:11px; width:140px; outline:none;
-}
-#search:focus { border-color:#58a6ff; }
-.sep { width:1px; height:20px; background:#21262d; }
-#new-group-input {
-  padding:3px 10px; border-radius:6px; border:1px solid #30363d;
   background:#161b22; color:#e6edf3; font-size:11px; width:130px; outline:none;
 }
+#search:focus { border-color:#58a6ff; }
+.sep { width:1px; height:18px; background:#21262d; flex-shrink:0; }
+
+/* 그룹 추가 바 */
+#add-group-bar {
+  padding:7px 20px; display:flex; gap:6px; align-items:center;
+  border-bottom:1px solid #21262d; background:#0a0d12;
+}
+#add-group-bar span { font-size:11px; color:#8b949e; }
+#new-group-input {
+  padding:3px 10px; border-radius:6px; border:1px solid #30363d;
+  background:#161b22; color:#e6edf3; font-size:11px; width:140px; outline:none;
+}
 #new-group-input:focus { border-color:#3fb950; }
-#new-group-color { width:28px; height:24px; border:none; border-radius:4px; cursor:pointer; padding:1px; }
+#new-group-color { width:26px; height:22px; border:none; border-radius:4px; cursor:pointer; padding:1px; }
 #new-group-btn {
   padding:3px 10px; border-radius:6px; border:none; background:#238636;
   color:#fff; cursor:pointer; font-size:11px; font-weight:600;
 }
 #new-group-btn:hover { background:#2ea043; }
 
-/* 히트맵 캔버스 */
+/* 히트맵 */
 #heatmap {
   margin:12px 20px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:flex-start;
-  align-content:flex-start;
+  display:flex; flex-wrap:wrap; gap:8px;
+  align-items:flex-start; align-content:flex-start;
 }
 
-/* 섹터 블록 */
 .sector {
-  border:1px solid #30363d;
-  border-radius:8px;
-  overflow:hidden;
-  flex-shrink:0;
-  min-width:120px;
-  transition:border-color 0.2s;
+  border:1px solid #30363d; border-radius:8px; overflow:hidden; flex-shrink:0; min-width:110px;
 }
-.sector.manual-sector { border-style:dashed; }
-.sector.drag-over { border-color:#58a6ff !important; background:#1c2128; }
+.sector.manual-sector { border-style:dashed; border-width:1.5px; }
+.sector.drag-over { background:#1c2128 !important; outline:2px dashed #58a6ff; outline-offset:-2px; }
 
 .sector-label {
-  padding:5px 8px;
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:0.5px;
-  text-transform:uppercase;
-  border-bottom:1px solid #21262d;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:6px;
-  color:#8b949e;
-  background:#0d1117;
-  cursor:default;
-  user-select:none;
+  padding:5px 8px; font-size:10px; font-weight:700; letter-spacing:0.4px;
+  text-transform:uppercase; border-bottom:1px solid #21262d;
+  display:flex; align-items:center; gap:5px;
+  background:#0a0d12; user-select:none;
 }
-.sector-label .label-text { flex:1; }
-.sector-label .sector-del {
-  background:none; border:none; color:#30363d; cursor:pointer; font-size:11px; padding:0 2px;
-  line-height:1;
-}
-.sector-label .sector-del:hover { color:#f85149; }
+.label-text { flex:1; }
+.sector-count { opacity:.5; font-weight:400; }
+.sector-del { background:none; border:none; color:#30363d; cursor:pointer; font-size:10px; padding:0 2px; }
+.sector-del:hover { color:#f85149; }
 
 .sector-body {
-  padding:6px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-  min-height:50px;
-  align-content:flex-start;
+  padding:6px; display:flex; flex-wrap:wrap; gap:5px;
+  min-height:52px; align-content:flex-start;
 }
+.sector-body .empty-hint { font-size:11px; color:#30363d; padding:4px; align-self:center; }
 
 /* 버블 */
 .bubble {
-  border-radius:6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:grab;
-  font-weight:700;
-  text-align:center;
-  padding:4px;
-  flex-shrink:0;
-  user-select:none;
-  transition:filter 0.12s, transform 0.12s;
-  position:relative;
-  line-height:1.2;
+  border-radius:6px; display:flex; align-items:center; justify-content:center;
+  cursor:grab; font-weight:700; text-align:center; padding:4px; flex-shrink:0;
+  user-select:none; transition:filter 0.12s, transform 0.12s; position:relative; line-height:1.2;
 }
 .bubble:hover { filter:brightness(1.2); transform:scale(1.05); z-index:10; }
 .bubble.dragging { opacity:0.3; cursor:grabbing; }
@@ -134,8 +117,7 @@ header h1 { font-size:16px; font-weight:700; }
 #drag-hint {
   display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
   background:#161b22; border:1px solid #58a6ff; border-radius:8px;
-  padding:8px 16px; font-size:12px; color:#58a6ff; z-index:500;
-  pointer-events:none;
+  padding:7px 16px; font-size:12px; color:#58a6ff; z-index:500; pointer-events:none;
 }
 
 /* 뉴스 모달 */
@@ -157,10 +139,7 @@ header h1 { font-size:16px; font-weight:700; }
 #modal-close { cursor:pointer; font-size:16px; color:#8b949e; background:none; border:none; }
 #modal-close:hover { color:#e6edf3; }
 #modal-body { padding:12px 20px; overflow-y:auto; }
-.news-card {
-  padding:12px; border:1px solid #21262d; border-radius:8px;
-  margin-bottom:8px; background:#0d1117;
-}
+.news-card { padding:12px; border:1px solid #21262d; border-radius:8px; margin-bottom:8px; background:#0d1117; }
 .news-card:hover { border-color:#58a6ff; }
 .card-title { font-size:13px; font-weight:600; margin-bottom:4px; }
 .card-title a { color:#e6edf3; text-decoration:none; }
@@ -168,17 +147,13 @@ header h1 { font-size:16px; font-weight:700; }
 .card-date { font-size:11px; color:#8b949e; margin-bottom:6px; }
 .card-summary { font-size:12px; color:#8b949e; line-height:1.6; }
 .card-insight { font-size:11px; color:#3fb950; margin-top:6px; padding-top:6px; border-top:1px solid #21262d; line-height:1.5; }
-
-#no-data { text-align:center; padding:60px; color:#8b949e; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>📊 뉴스 키워드 히트맵</h1>
-  <div class="header-right">
-    <span id="updated-at"></span>
-  </div>
+  <span id="updated-at"></span>
 </header>
 
 <div id="stats">
@@ -187,21 +162,24 @@ header h1 { font-size:16px; font-weight:700; }
 </div>
 
 <div id="toolbar">
-  <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
-  <button class="filter-btn" onclick="setFilter('top30',this)">TOP 30</button>
-  <button class="filter-btn" onclick="setFilter('top60',this)">TOP 60</button>
-  <input id="search" type="text" placeholder="키워드 검색..." oninput="renderHeatmap()">
+  <button class="filter-btn active" onclick="setCountFilter('all',this)">전체</button>
+  <button class="filter-btn" onclick="setCountFilter('top30',this)">TOP 30</button>
+  <button class="filter-btn" onclick="setCountFilter('top60',this)">TOP 60</button>
+  <input id="search" type="text" placeholder="키워드 검색..." oninput="render()">
   <div class="sep"></div>
-  <span style="font-size:11px;color:#8b949e">그룹 추가:</span>
-  <input id="new-group-input" placeholder="그룹 이름..." onkeydown="if(event.key==='Enter')addGroup()">
-  <input type="color" id="new-group-color" value="#f78166">
-  <button id="new-group-btn" onclick="addGroup()">+ 추가</button>
+  <div id="group-filter-btns"></div>
 </div>
 
-<div id="heatmap"><div id="no-data">⏳ 로딩 중...</div></div>
-<div id="drag-hint">🎯 그룹 섹션에 드롭하세요</div>
+<div id="add-group-bar">
+  <span>+ 새 그룹:</span>
+  <input id="new-group-input" placeholder="그룹 이름..." onkeydown="if(event.key==='Enter')addGroup()">
+  <input type="color" id="new-group-color" value="#f78166">
+  <button id="new-group-btn" onclick="addGroup()">추가</button>
+</div>
 
-<!-- 뉴스 모달 -->
+<div id="heatmap"></div>
+<div id="drag-hint">🎯 수동 그룹 섹터에 드롭하세요</div>
+
 <div id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div id="modal">
     <div id="modal-header">
@@ -213,17 +191,21 @@ header h1 { font-size:16px; font-weight:700; }
 </div>
 
 <script>
-const LS = 'ntt_heatmap_v1';
+const LS = 'ntt_v3';
 let DB = {};
 let allKws = [];
-let currentFilter = 'all';
+let countFilter = 'all';
+let groupFilter = null; // null = 전체
 let dragKw = null;
+// 수동으로 특정 그룹에서 제거된 키워드 → 기타로 강제 이동
+// dismissed[kwName] = true 이면 자동그룹 무시하고 기타로
+const LS_DISMISSED = 'ntt_dismissed_v3';
 
-// ── localStorage ──────────────────────────────────
+function getDismissed() { try { return JSON.parse(localStorage.getItem(LS_DISMISSED)) || {}; } catch { return {}; } }
+function setDismissed(d) { localStorage.setItem(LS_DISMISSED, JSON.stringify(d)); }
 function getGroups() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; } }
 function setGroups(g) { localStorage.setItem(LS, JSON.stringify(g)); }
 
-// ── 데이터 로드 ───────────────────────────────────
 async function init() {
   try {
     const res = await fetch('news_db.json');
@@ -235,97 +217,149 @@ async function init() {
     allKws = Object.entries(DB.keywords || {})
       .map(([name, d]) => ({ name, count: d.count, autoGroup: d.group, articles: d.articles }))
       .sort((a, b) => b.count - a.count);
-    renderHeatmap();
+    render();
   } catch {
-    document.getElementById('heatmap').innerHTML = '<div id="no-data" style="color:#f85149">❌ news_db.json을 GitHub에 업로드해주세요.</div>';
+    document.getElementById('heatmap').innerHTML =
+      '<div style="padding:60px;text-align:center;color:#f85149">❌ news_db.json을 GitHub에 업로드해주세요.</div>';
   }
 }
 
-// ── 필터 ─────────────────────────────────────────
+// 키워드의 실제 그룹 계산
+// 우선순위: 수동그룹 포함 > dismissed면 기타 > 자동그룹
+function resolveGroup(kw, groups, dismissed) {
+  // 수동 그룹에 포함되어 있으면 해당 그룹들 반환 (중복 가능)
+  const manualGroups = Object.entries(groups)
+    .filter(([, gd]) => gd.keywords.includes(kw.name))
+    .map(([gname]) => gname);
+  if (manualGroups.length) return { type: 'manual', groups: manualGroups };
+  if (dismissed[kw.name]) return { type: 'auto', group: '기타' };
+  return { type: 'auto', group: kw.autoGroup || '기타' };
+}
+
 function getFiltered() {
   let kws = [...allKws];
   const q = document.getElementById('search').value.trim();
   if (q) kws = kws.filter(k => k.name.includes(q));
-  if (currentFilter === 'top30') kws = kws.slice(0, 30);
-  if (currentFilter === 'top60') kws = kws.slice(0, 60);
+  if (countFilter === 'top30') kws = kws.slice(0, 30);
+  if (countFilter === 'top60') kws = kws.slice(0, 60);
   return kws;
 }
-function setFilter(t, btn) {
-  currentFilter = t;
+
+function setCountFilter(t, btn) {
+  countFilter = t;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderHeatmap();
+  render();
 }
 
-// ── 히트맵 렌더 ──────────────────────────────────
-function renderHeatmap() {
+function setGroupFilter(g) {
+  groupFilter = groupFilter === g ? null : g;
+  render();
+}
+
+function render() {
   const hm = document.getElementById('heatmap');
   const filtered = getFiltered();
   const groups = getGroups();
-  const autoGroupColors = DB.group_colors || {};
-
-  if (!filtered.length) { hm.innerHTML = '<div id="no-data">검색 결과 없음</div>'; return; }
+  const dismissed = getDismissed();
+  const autoColors = DB.group_colors || {};
 
   const maxC = allKws[0]?.count || 1;
   const minC = allKws[allKws.length - 1]?.count || 1;
 
-  function bubbleHtml(kw, sectorColor, showRemove, gname) {
+  // 그룹 필터 버튼 렌더
+  renderGroupFilterBtns(groups, autoColors, filtered, dismissed);
+
+  // 섹터별 키워드 분류
+  // autoSectors: { groupName: [kw, ...] }
+  // manualSectors: { groupName: [kw, ...] }
+  const autoSectors = {};
+  const manualSectors = {};
+
+  Object.keys(groups).forEach(g => { manualSectors[g] = []; });
+
+  filtered.forEach(kw => {
+    const resolved = resolveGroup(kw, groups, dismissed);
+    if (resolved.type === 'manual') {
+      resolved.groups.forEach(g => {
+        if (manualSectors[g]) manualSectors[g].push(kw);
+      });
+      // 수동 그룹에 있으면 자동 섹터에는 안 넣음
+    } else {
+      const g = resolved.group;
+      if (!autoSectors[g]) autoSectors[g] = [];
+      autoSectors[g].push(kw);
+    }
+  });
+
+  // groupFilter 적용
+  let html = '';
+
+  const renderBubble = (kw, color, removable, removeAction) => {
     const ratio = maxC === minC ? 0.5 : (kw.count - minC) / (maxC - minC);
     const size = Math.round(52 + ratio * 90);
     const fs = Math.round(9 + ratio * 6);
-    const countFs = Math.round(fs * 0.72);
-    const alpha = Math.round(35 + ratio * 60).toString(16).padStart(2,'0');
-    const c = sectorColor;
-    const rm = showRemove
-      ? `<span class="rm" onclick="removeKw('${escJ(gname)}','${escJ(kw.name)}')">✕</span>`
-      : '';
+    const cfs = Math.round(fs * 0.72);
+    const alpha = Math.round(35 + ratio * 60).toString(16).padStart(2, '0');
+    const rm = removable
+      ? `<span class="rm" onclick="${removeAction}">✕</span>` : '';
     return `<div class="bubble" data-kw="${escJ(kw.name)}" draggable="true"
       style="width:${size}px;height:${size}px;font-size:${fs}px;
-             background:${c+alpha};border:1.5px solid ${c}88;color:#e6edf3;">
+             background:${color+alpha};border:1.5px solid ${color}88;color:#e6edf3;">
       ${rm}
       <div>
         <span class="kw-name">${kw.name}</span>
-        <span class="kw-count" style="font-size:${countFs}px">${kw.count}회</span>
+        <span class="kw-count" style="font-size:${cfs}px">${kw.count}회</span>
       </div>
     </div>`;
+  };
+
+  const renderSector = (id, label, color, kws, isManual) => {
+    if (groupFilter && groupFilter !== label) return '';
+    const bubblesHtml = kws.map(kw => {
+      if (isManual) {
+        return renderBubble(kw, color, true, `removeFromManual('${escJ(label)}','${escJ(kw.name)}')`);
+      } else {
+        // 기타가 아닌 자동 그룹은 삭제 가능 (→기타로)
+        const canRemove = label !== '기타';
+        return renderBubble(kw, color, canRemove, `dismissKw('${escJ(kw.name)}')`);
+      }
+    }).join('');
+    const delBtn = isManual
+      ? `<button class="sector-del" onclick="deleteGroup('${escJ(label)}')">✕</button>` : '';
+    const droppable = isManual ? `data-manual="${escJ(label)}"` : '';
+    return `<div class="sector ${isManual?'manual-sector':''}" ${droppable}
+      style="border-color:${color}${isManual?'':'44'}">
+      <div class="sector-label" style="color:${color}">
+        <span class="label-text">${label}</span>
+        <span class="sector-count">${kws.length}</span>
+        ${delBtn}
+      </div>
+      <div class="sector-body">
+        ${kws.length ? bubblesHtml : '<span class="empty-hint">드래그해서 추가</span>'}
+      </div>
+    </div>`;
+  };
+
+  // 자동 섹터 (기타 제외 먼저)
+  const autoOrder = Object.keys(autoSectors).filter(g => g !== '기타');
+  autoOrder.forEach(g => {
+    const color = autoColors[g] || '#8b949e';
+    html += renderSector(g, g, color, autoSectors[g], false);
+  });
+
+  // 수동 섹터
+  Object.entries(manualSectors).forEach(([g, kws]) => {
+    const color = groups[g]?.color || '#58a6ff';
+    html += renderSector(g, g, color, kws, true);
+  });
+
+  // 기타 섹터 (맨 마지막)
+  if (autoSectors['기타']?.length && (!groupFilter || groupFilter === '기타')) {
+    html += renderSector('기타', '기타', '#8b949e', autoSectors['기타'], false);
   }
 
-  let html = '';
-
-  // 1. 자동 그룹 섹터들
-  const autoGroupNames = [...new Set(filtered.map(k => k.autoGroup).filter(Boolean))];
-  autoGroupNames.forEach(g => {
-    const color = autoGroupColors[g] || '#8b949e';
-    const kws = filtered.filter(k => k.autoGroup === g);
-    if (!kws.length) return;
-    html += `<div class="sector" data-sector="${escJ(g)}" style="border-color:${color}44">
-      <div class="sector-label" style="color:${color}">
-        <span class="label-text">${g}</span>
-        <span style="opacity:.5">${kws.length}</span>
-      </div>
-      <div class="sector-body">${kws.map(k => bubbleHtml(k, color, false, null)).join('')}</div>
-    </div>`;
-  });
-
-  // 2. 수동 그룹 섹터들
-  Object.entries(groups).forEach(([gname, gdata]) => {
-    const color = gdata.color;
-    const kws = filtered.filter(k => gdata.keywords.includes(k.name));
-    html += `<div class="sector manual-sector" data-sector="${escJ(gname)}" data-manual="${escJ(gname)}" style="border-color:${color}">
-      <div class="sector-label" style="color:${color}">
-        <span class="label-text">${gname}</span>
-        <span style="opacity:.5">${kws.length}</span>
-        <button class="sector-del" onclick="deleteGroup('${escJ(gname)}')">✕</button>
-      </div>
-      <div class="sector-body ${kws.length===0?'':''}">
-        ${kws.length === 0
-          ? '<span style="font-size:11px;color:#30363d;padding:4px">드래그해서 추가</span>'
-          : kws.map(k => bubbleHtml(k, color, true, gname)).join('')}
-      </div>
-    </div>`;
-  });
-
-  hm.innerHTML = html;
+  hm.innerHTML = html || '<div style="padding:40px;color:#8b949e;text-align:center">키워드가 없어요.</div>';
 
   // 버블 이벤트
   hm.querySelectorAll('.bubble').forEach(el => {
@@ -346,28 +380,92 @@ function renderHeatmap() {
     });
   });
 
-  // 수동 섹터 드롭존
+  // 수동 섹터 드롭
   hm.querySelectorAll('.sector[data-manual]').forEach(sec => {
     sec.addEventListener('dragover', e => { e.preventDefault(); sec.classList.add('drag-over'); });
     sec.addEventListener('dragleave', e => {
       if (!sec.contains(e.relatedTarget)) sec.classList.remove('drag-over');
     });
     sec.addEventListener('drop', e => {
-      e.preventDefault();
-      sec.classList.remove('drag-over');
+      e.preventDefault(); sec.classList.remove('drag-over');
       if (!dragKw) return;
       const gname = sec.dataset.manual;
-      const groups = getGroups();
-      if (!groups[gname].keywords.includes(dragKw)) {
-        groups[gname].keywords.push(dragKw);
-        setGroups(groups);
-        renderHeatmap();
+      const g = getGroups();
+      if (!g[gname]) return;
+      if (!g[gname].keywords.includes(dragKw)) {
+        g[gname].keywords.push(dragKw);
+        setGroups(g);
+        render();
       }
     });
   });
 }
 
-// ── 그룹 관리 ─────────────────────────────────────
+function renderGroupFilterBtns(groups, autoColors, filtered, dismissed) {
+  const container = document.getElementById('group-filter-btns');
+  const autoGroupNames = [...new Set(filtered.map(k => {
+    const r = resolveGroup(k, groups, dismissed);
+    return r.type === 'auto' ? r.group : null;
+  }).filter(Boolean))].filter(g => g !== '기타');
+
+  let html = '';
+  autoGroupNames.forEach(g => {
+    const color = autoColors[g] || '#8b949e';
+    html += `<button class="group-filter-btn ${groupFilter===g?'active':''}"
+      style="color:${color};border-color:${color}66;background:${color}${groupFilter===g?'22':'11'}"
+      onclick="setGroupFilter('${escJ(g)}')">${g}</button>`;
+  });
+  Object.entries(groups).forEach(([gname, gdata]) => {
+    const color = gdata.color;
+    html += `<button class="group-filter-btn ${groupFilter===gname?'active':''}"
+      style="color:${color};border-color:${color}66;background:${color}${groupFilter===gname?'22':'11'}"
+      onclick="setGroupFilter('${escJ(gname)}')">${gname}</button>`;
+  });
+  if (Object.values(groups).some(g => g) || autoGroupNames.length) {
+    html = `<button class="group-filter-btn ${!groupFilter?'active':''}"
+      style="color:#8b949e;border-color:#30363d;background:${!groupFilter?'#21262d':'transparent'}"
+      onclick="setGroupFilter(null)">전체보기</button>` + html;
+  }
+  container.innerHTML = html;
+}
+
+// 자동 분류에서 제거 → 기타로
+function dismissKw(kwName) {
+  const d = getDismissed();
+  d[kwName] = true;
+  setDismissed(d);
+  render();
+}
+
+// 수동 그룹에서 제거 → 기타로
+function removeFromManual(gname, kwName) {
+  const g = getGroups();
+  if (!g[gname]) return;
+  g[gname].keywords = g[gname].keywords.filter(k => k !== kwName);
+  setGroups(g);
+  // 다른 수동 그룹에도 없으면 dismissed 처리
+  const stillInManual = Object.values(g).some(gd => gd.keywords.includes(kwName));
+  if (!stillInManual) {
+    const d = getDismissed();
+    d[kwName] = true;
+    setDismissed(d);
+  }
+  render();
+}
+
+// 수동 그룹에 드롭 시 dismissed 해제
+function addToManual(gname, kwName) {
+  const g = getGroups();
+  if (!g[gname] || g[gname].keywords.includes(kwName)) return;
+  g[gname].keywords.push(kwName);
+  setGroups(g);
+  // dismissed 해제
+  const d = getDismissed();
+  delete d[kwName];
+  setDismissed(d);
+  render();
+}
+
 function addGroup() {
   const name = document.getElementById('new-group-input').value.trim();
   const color = document.getElementById('new-group-color').value;
@@ -377,7 +475,7 @@ function addGroup() {
   g[name] = { color, keywords: [] };
   setGroups(g);
   document.getElementById('new-group-input').value = '';
-  renderHeatmap();
+  render();
 }
 
 function deleteGroup(name) {
@@ -385,18 +483,9 @@ function deleteGroup(name) {
   const g = getGroups();
   delete g[name];
   setGroups(g);
-  renderHeatmap();
+  render();
 }
 
-function removeKw(gname, kw) {
-  const g = getGroups();
-  if (!g[gname]) return;
-  g[gname].keywords = g[gname].keywords.filter(k => k !== kw);
-  setGroups(g);
-  renderHeatmap();
-}
-
-// ── 뉴스 모달 ─────────────────────────────────────
 function showModal(name) {
   const kw = allKws.find(k => k.name === name);
   if (!kw) return;
@@ -406,10 +495,10 @@ function showModal(name) {
     `${kw.autoGroup || '미분류'} · ${kw.count}회 언급 · ${kw.articles.length}건`;
   document.getElementById('modal-body').innerHTML = kw.articles.map(a => `
     <div class="news-card">
-      <div class="card-title">${a.url ? `<a href="${a.url}" target="_blank">🔗 ${a.title}</a>` : a.title}</div>
+      <div class="card-title">${a.url?`<a href="${a.url}" target="_blank">🔗 ${a.title}</a>`:a.title}</div>
       <div class="card-date">📅 ${a.date}</div>
-      <div class="card-summary">${(a.summary || '').replace(/\n/g, '<br>')}</div>
-      ${a.insight ? `<div class="card-insight">📈 ${(a.insight||'').replace(/\n/g,'<br>')}</div>` : ''}
+      <div class="card-summary">${(a.summary||'').replace(/\n/g,'<br>')}</div>
+      ${a.insight?`<div class="card-insight">📈 ${(a.insight||'').replace(/\n/g,'<br>')}</div>`:''}
     </div>`).join('');
   document.getElementById('modal-overlay').classList.add('show');
 }
