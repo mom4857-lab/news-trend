@@ -27,14 +27,13 @@ header h1 { font-size:16px; font-weight:700; }
 .filter-btn {
   padding:3px 10px; border-radius:20px; border:1px solid #30363d;
   background:#161b22; color:#8b949e; cursor:pointer; font-size:11px; transition:all 0.2s;
-  white-space:nowrap;
 }
 .filter-btn.active { background:#58a6ff; color:#0d1117; border-color:#58a6ff; }
 .filter-btn:hover:not(.active) { border-color:#58a6ff; color:#58a6ff; }
 .group-filter-btn {
   padding:3px 10px; border-radius:20px; border:1px solid transparent;
   background:transparent; cursor:pointer; font-size:11px; transition:all 0.2s;
-  white-space:nowrap; font-weight:600;
+  font-weight:600;
 }
 .group-filter-btn.active { opacity:1 !important; }
 .group-filter-btn:not(.active) { opacity:0.45; }
@@ -64,8 +63,7 @@ header h1 { font-size:16px; font-weight:700; }
 #new-group-btn:hover { background:#2ea043; }
 
 #heatmap {
-  margin:12px 20px;
-  display:flex; flex-wrap:wrap; gap:8px;
+  margin:12px 20px; display:flex; flex-wrap:wrap; gap:8px;
   align-items:flex-start; align-content:flex-start;
 }
 
@@ -85,19 +83,14 @@ header h1 { font-size:16px; font-weight:700; }
 .sector-del { background:none; border:none; color:#30363d; cursor:pointer; font-size:10px; padding:0 2px; }
 .sector-del:hover { color:#f85149; }
 
-/* 기타 섹터 - 그리드 레이아웃 */
 .sector-body {
-  padding:8px; display:flex; flex-wrap:wrap; gap:6px;
-  align-content:flex-start;
+  padding:8px; display:flex; flex-wrap:wrap; gap:6px; align-content:flex-start;
 }
 .sector-body.grid-layout {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(70px, 1fr));
-  gap:5px;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(68px, 1fr)); gap:5px;
 }
 .sector-body .empty-hint { font-size:11px; color:#30363d; padding:4px; align-self:center; }
 
-/* 버블 */
 .bubble {
   border-radius:6px; display:flex; align-items:center; justify-content:center;
   cursor:grab; font-weight:700; text-align:center; padding:4px; flex-shrink:0;
@@ -105,7 +98,8 @@ header h1 { font-size:16px; font-weight:700; }
 }
 .bubble:hover { filter:brightness(1.2); transform:scale(1.05); z-index:10; }
 .bubble.dragging { opacity:0.3; cursor:grabbing; }
-.bubble .kw-name { display:block; pointer-events:none; word-break:keep-all; }
+.bubble.drop-target { outline:2px solid #f78166; outline-offset:1px; }
+.bubble .kw-name { display:block; pointer-events:none; }
 .bubble .kw-count { display:block; opacity:0.7; pointer-events:none; }
 .bubble .rm {
   display:none; position:absolute; top:-4px; right:-4px;
@@ -115,28 +109,15 @@ header h1 { font-size:16px; font-weight:700; }
 }
 .bubble:hover .rm { display:block; }
 
-/* 키워드 서브그룹 (버블 안에 버블 묶음) */
-.kw-subgroup {
-  border:1px dashed rgba(255,255,255,0.2); border-radius:6px;
-  padding:4px; display:flex; flex-wrap:wrap; gap:4px;
-  position:relative; cursor:default;
+/* 이름 편집 */
+.kw-name-edit {
+  display:block; pointer-events:all; cursor:text; outline:none;
+  min-width:20px; word-break:break-all;
+  border-bottom:1px solid transparent;
 }
-.kw-subgroup-label {
-  position:absolute; top:-8px; left:6px;
-  font-size:9px; color:rgba(255,255,255,0.5);
-  background:#0d1117; padding:0 3px;
-}
-.kw-subgroup.drag-over { background:rgba(255,255,255,0.05); }
-
-/* 키워드 이름 편집 */
-.bubble .kw-name-editable {
-  display:block; pointer-events:all; cursor:text;
-  outline:none; border-bottom:1px solid transparent;
-  min-width:20px;
-}
-.bubble .kw-name-editable:focus {
-  border-bottom:1px solid rgba(255,255,255,0.5);
-  background:rgba(0,0,0,0.2); border-radius:2px; padding:0 2px;
+.kw-name-edit:focus {
+  border-bottom:1px solid rgba(255,255,255,0.6);
+  background:rgba(0,0,0,0.25); border-radius:2px; padding:0 2px;
 }
 
 #drag-hint {
@@ -145,7 +126,6 @@ header h1 { font-size:16px; font-weight:700; }
   padding:7px 16px; font-size:12px; color:#58a6ff; z-index:500; pointer-events:none;
 }
 
-/* 뉴스 모달 */
 #modal-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8);
   z-index:300; align-items:center; justify-content:center;
@@ -203,7 +183,7 @@ header h1 { font-size:16px; font-weight:700; }
 </div>
 
 <div id="heatmap"></div>
-<div id="drag-hint">🎯 섹터에 드롭 or 버블 위에 드롭하면 서브그룹!</div>
+<div id="drag-hint">🎯 섹터에 드롭 | 버블 위에 드롭하면 합치기</div>
 
 <div id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div id="modal">
@@ -216,26 +196,51 @@ header h1 { font-size:16px; font-weight:700; }
 </div>
 
 <script>
-const LS = 'ntt_v4';
-const LS_DISMISSED = 'ntt_dismissed_v4';
-const LS_SUBGROUPS = 'ntt_subgroups_v1'; // { groupName: { mainKw: [subKws] } }
-const LS_RENAMES = 'ntt_renames_v1'; // { originalName: displayName }
+const LS       = 'ntt_v5_groups';
+const LS_DISM  = 'ntt_v5_dismissed';
+const LS_MERGE = 'ntt_v5_merge';   // { groupName: { masterKw: [aliasKws] } }
+const LS_ALIAS = 'ntt_v5_alias';   // { originalKw: displayName }
 
-let DB = {};
-let allKws = [];
-let countFilter = 'all';
-let groupFilter = null;
-let dragKw = null;
-let dragOverBubble = null; // 버블 위에 드래그 중인 대상
+let DB = {}, allKws = [], countFilter = 'all', groupFilter = null, dragKw = null;
 
-function getGroups() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; } }
-function setGroups(g) { localStorage.setItem(LS, JSON.stringify(g)); }
-function getDismissed() { try { return JSON.parse(localStorage.getItem(LS_DISMISSED)) || {}; } catch { return {}; } }
-function setDismissed(d) { localStorage.setItem(LS_DISMISSED, JSON.stringify(d)); }
-function getSubgroups() { try { return JSON.parse(localStorage.getItem(LS_SUBGROUPS)) || {}; } catch { return {}; } }
-function setSubgroups(s) { localStorage.setItem(LS_SUBGROUPS, JSON.stringify(s)); }
-function getRenames() { try { return JSON.parse(localStorage.getItem(LS_RENAMES)) || {}; } catch { return {}; } }
-function setRenames(r) { localStorage.setItem(LS_RENAMES, JSON.stringify(r)); }
+const getGroups  = () => { try { return JSON.parse(localStorage.getItem(LS))       || {}; } catch { return {}; } };
+const setGroups  = g => localStorage.setItem(LS, JSON.stringify(g));
+const getDism    = () => { try { return JSON.parse(localStorage.getItem(LS_DISM))  || {}; } catch { return {}; } };
+const setDism    = d => localStorage.setItem(LS_DISM, JSON.stringify(d));
+const getMerge   = () => { try { return JSON.parse(localStorage.getItem(LS_MERGE)) || {}; } catch { return {}; } };
+const setMerge   = m => localStorage.setItem(LS_MERGE, JSON.stringify(m));
+const getAlias   = () => { try { return JSON.parse(localStorage.getItem(LS_ALIAS)) || {}; } catch { return {}; } };
+const setAlias   = a => localStorage.setItem(LS_ALIAS, JSON.stringify(a));
+
+// 표시 이름
+const dispName = kw => getAlias()[kw] || kw;
+
+// 특정 그룹에서 kw의 합산 카운트 (alias 포함)
+function mergedCount(gname, masterKw) {
+  const merge = getMerge();
+  const aliases = merge[gname]?.[masterKw] || [];
+  const allNames = [masterKw, ...aliases];
+  return allNames.reduce((sum, n) => {
+    const found = allKws.find(k => k.name === n);
+    return sum + (found?.count || 0);
+  }, 0);
+}
+
+// 특정 그룹에서 kw의 합산 articles
+function mergedArticles(gname, masterKw) {
+  const merge = getMerge();
+  const aliases = merge[gname]?.[masterKw] || [];
+  const allNames = [masterKw, ...aliases];
+  const seen = new Set();
+  const arts = [];
+  allNames.forEach(n => {
+    const found = allKws.find(k => k.name === n);
+    (found?.articles || []).forEach(a => {
+      if (!seen.has(a.title)) { seen.add(a.title); arts.push(a); }
+    });
+  });
+  return arts.sort((a,b) => b.date.localeCompare(a.date));
+}
 
 async function init() {
   try {
@@ -255,15 +260,10 @@ async function init() {
   }
 }
 
-function getDisplayName(name) {
-  const renames = getRenames();
-  return renames[name] || name;
-}
-
 function getFiltered() {
   let kws = [...allKws];
   const q = document.getElementById('search').value.trim();
-  if (q) kws = kws.filter(k => k.name.includes(q) || getDisplayName(k.name).includes(q));
+  if (q) kws = kws.filter(k => k.name.includes(q) || dispName(k.name).includes(q));
   if (countFilter === 'top30') kws = kws.slice(0, 30);
   if (countFilter === 'top60') kws = kws.slice(0, 60);
   return kws;
@@ -272,132 +272,111 @@ function getFiltered() {
 function setCountFilter(t, btn) {
   countFilter = t;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  render();
-}
-
-function resolveGroup(kw, groups, dismissed) {
-  const manualGroups = Object.entries(groups)
-    .filter(([, gd]) => gd.keywords.includes(kw.name))
-    .map(([gname]) => gname);
-  if (manualGroups.length) return { type: 'manual', groups: manualGroups };
-  if (dismissed[kw.name]) return { type: 'auto', group: '기타' };
-  return { type: 'auto', group: '기타' };
+  btn.classList.add('active'); render();
 }
 
 function render() {
   const hm = document.getElementById('heatmap');
   const filtered = getFiltered();
   const groups = getGroups();
-  const dismissed = getDismissed();
-  const subgroups = getSubgroups();
-  const renames = getRenames();
-
+  const dism = getDism();
+  const merge = getMerge();
   const maxC = allKws[0]?.count || 1;
-  const minC = allKws[allKws.length - 1]?.count || 1;
+  const minC = allKws[allKws.length-1]?.count || 1;
 
-  // 그룹 필터 버튼
-  renderGroupFilterBtns(groups, filtered, dismissed);
+  renderGroupFilterBtns(groups);
 
   // 섹터별 분류
   const manualSectors = {};
   Object.keys(groups).forEach(g => { manualSectors[g] = []; });
-
   const etcKws = [];
 
+  // alias인 키워드 목록 (그룹별로 master에 묶인 것들)
+  const aliasedInGroup = {}; // groupName -> Set of aliased kw names
+  Object.entries(merge).forEach(([gname, masters]) => {
+    if (!aliasedInGroup[gname]) aliasedInGroup[gname] = new Set();
+    Object.values(masters).flat().forEach(a => aliasedInGroup[gname].add(a));
+  });
+
   filtered.forEach(kw => {
-    const resolved = resolveGroup(kw, groups, dismissed);
-    if (resolved.type === 'manual') {
-      resolved.groups.forEach(g => { if (manualSectors[g]) manualSectors[g].push(kw); });
-    } else {
+    const inManual = Object.entries(groups).filter(([,gd]) => gd.keywords.includes(kw.name)).map(([g]) => g);
+    if (inManual.length) {
+      inManual.forEach(g => {
+        // alias로 묶인 것은 제외 (master만 표시)
+        if (!aliasedInGroup[g]?.has(kw.name)) manualSectors[g].push(kw);
+      });
+    } else if (!dism[kw.name]) {
       etcKws.push(kw);
     }
   });
 
-  function renderBubble(kw, color, removable, removeAction, inSubgroup) {
-    const ratio = maxC === minC ? 0.5 : (kw.count - minC) / (maxC - minC);
-    // 기타 섹터는 고정 작은 크기, 그룹 섹터는 비율 크기
-    const size = inSubgroup ? 52 : Math.round(52 + ratio * 80);
-    const fs = inSubgroup ? 9 : Math.round(9 + ratio * 5);
-    const cfs = Math.round(fs * 0.75);
-    const alpha = Math.round(35 + ratio * 60).toString(16).padStart(2, '0');
-    const rm = removable ? `<span class="rm" onclick="${removeAction}">✕</span>` : '';
-    const displayName = getDisplayName(kw.name);
-    return `<div class="bubble" data-kw="${escJ(kw.name)}" draggable="true"
+  function makeBubble(kw, color, count, removeFn, gname) {
+    const ratio = maxC === minC ? 0.5 : (count - minC) / (maxC - minC);
+    const size = Math.round(52 + ratio * 80);
+    const fs   = Math.round(9 + ratio * 5);
+    const cfs  = Math.round(fs * 0.75);
+    const alpha = Math.round(35 + ratio * 60).toString(16).padStart(2,'0');
+    const rm = removeFn ? `<span class="rm" onclick="${removeFn}">✕</span>` : '';
+    const name = dispName(kw.name);
+    // alias 배지
+    const aliases = gname ? (merge[gname]?.[kw.name] || []) : [];
+    const badge = aliases.length
+      ? `<span style="position:absolute;top:-5px;left:-5px;background:#f78166;color:#fff;
+           font-size:8px;border-radius:10px;padding:1px 4px;font-weight:900;pointer-events:none">
+           +${aliases.length}</span>`
+      : '';
+    return `<div class="bubble" data-kw="${escJ(kw.name)}" data-gname="${escJ(gname||'')}" draggable="true"
       style="width:${size}px;height:${size}px;font-size:${fs}px;
              background:${color+alpha};border:1.5px solid ${color}88;color:#e6edf3;">
-      ${rm}
+      ${rm}${badge}
       <div>
-        <span class="kw-name-editable" contenteditable="true"
-          onblur="renameKw('${escJ(kw.name)}',this)"
-          onclick="event.stopPropagation()"
-          ondblclick="event.stopPropagation()">${displayName}</span>
-        <span class="kw-count" style="font-size:${cfs}px">${kw.count}회</span>
+        <span class="kw-name-edit" contenteditable="true"
+          onblur="onRename('${escJ(kw.name)}',this)"
+          onclick="event.stopPropagation()">${name}</span>
+        <span class="kw-count" style="font-size:${cfs}px">${count}회</span>
       </div>
     </div>`;
   }
 
   function renderSector(label, color, kws, isManual) {
     if (groupFilter && groupFilter !== label) return '';
-
-    // 수동 그룹에서 서브그룹 처리
-    let bodyContent = '';
-    if (isManual) {
-      const sg = subgroups[label] || {};
-      const assignedToSub = new Set(Object.values(sg).flat());
-      const mainKws = kws.filter(k => !assignedToSub.has(k.name));
-      
-      // 일반 버블
-      bodyContent += mainKws.map(kw => {
-        return renderBubble(kw, color, true, `removeFromManual('${escJ(label)}','${escJ(kw.name)}')`, false);
-      }).join('');
-
-      // 서브그룹
-      Object.entries(sg).forEach(([mainKw, subKwNames]) => {
-        const mainKwObj = kws.find(k => k.name === mainKw);
-        if (!mainKwObj) return;
-        const subKwObjs = subKwNames.map(n => kws.find(k => k.name === n)).filter(Boolean);
-        if (!subKwObjs.length) return;
-
-        bodyContent += `<div class="kw-subgroup" data-group="${escJ(label)}" data-main="${escJ(mainKw)}"
-          ondragover="sgOver(event,this)" ondragleave="sgLeave(this)" ondrop="sgDrop(event,'${escJ(label)}','${escJ(mainKw)}')">
-          <span class="kw-subgroup-label">${getDisplayName(mainKw)}</span>
-          ${renderBubble(mainKwObj, color, true, `removeFromManual('${escJ(label)}','${escJ(mainKw)}')`, true)}
-          ${subKwObjs.map(k => renderBubble(k, color, true, `removeFromSubgroup('${escJ(label)}','${escJ(mainKw)}','${escJ(k.name)}')`, true)).join('')}
-        </div>`;
-      });
-    } else {
-      // 기타 섹터 - 그리드
-      bodyContent = kws.map(kw => renderBubble(kw, color, label !== '기타', `dismissKw('${escJ(kw.name)}')`, false)).join('');
-    }
-
     const delBtn = isManual ? `<button class="sector-del" onclick="deleteGroup('${escJ(label)}')">✕</button>` : '';
     const droppable = isManual ? `data-manual="${escJ(label)}"` : '';
-    const gridClass = label === '기타' ? 'grid-layout' : '';
-    const minW = label === '기타' ? 'min-width:calc(100vw - 40px)' : 'min-width:110px';
+    const isEtc = label === '기타';
+    const gridCls = isEtc ? 'grid-layout' : '';
+    const minW = isEtc ? `min-width:min(calc(100vw - 40px), 900px)` : 'min-width:110px';
+    const maxH = isEtc ? 'max-height:320px;overflow-y:auto;' : '';
 
-    return `<div class="sector ${isManual?'manual-sector':''}" ${droppable} style="border-color:${color}${isManual?'':'44'};${minW}">
+    let bodyHtml = '';
+    if (!kws.length && isManual) {
+      bodyHtml = '<span class="empty-hint">드래그해서 추가</span>';
+    } else {
+      kws.forEach(kw => {
+        const count = isManual ? mergedCount(label, kw.name) : kw.count;
+        const rm = isManual ? `removeFromManual('${escJ(label)}','${escJ(kw.name)}')` : (isEtc ? '' : `dismissKw('${escJ(kw.name)}')`);
+        bodyHtml += makeBubble(kw, color, count, rm || null, isManual ? label : null);
+      });
+    }
+
+    return `<div class="sector ${isManual?'manual-sector':''}" ${droppable}
+      style="border-color:${color}${isManual?'':'44'};${minW}">
       <div class="sector-label" style="color:${color}">
         <span class="label-text">${label}</span>
         <span class="sector-count">${kws.length}</span>
         ${delBtn}
       </div>
-      <div class="sector-body ${gridClass}" style="${label==='기타'?'max-height:320px;overflow-y:auto;':''}">
-        ${bodyContent || (isManual ? '<span class="empty-hint">드래그해서 추가</span>' : '')}
-      </div>
+      <div class="sector-body ${gridCls}" style="${maxH}">${bodyHtml}</div>
     </div>`;
   }
 
   let html = '';
   Object.entries(manualSectors).forEach(([g, kws]) => {
-    const color = groups[g]?.color || '#58a6ff';
-    html += renderSector(g, color, kws, true);
+    html += renderSector(g, groups[g]?.color || '#58a6ff', kws, true);
   });
   if (etcKws.length && (!groupFilter || groupFilter === '기타')) {
     html += renderSector('기타', '#8b949e', etcKws, false);
   }
-
-  hm.innerHTML = html || '<div style="padding:40px;color:#8b949e;text-align:center">키워드가 없어요.</div>';
+  hm.innerHTML = html || '<div style="padding:40px;color:#8b949e;text-align:center">키워드 없음</div>';
 
   // 버블 이벤트
   hm.querySelectorAll('.bubble').forEach(el => {
@@ -413,35 +392,32 @@ function render() {
       document.getElementById('drag-hint').style.display = 'none';
       hm.querySelectorAll('.bubble.drop-target').forEach(b => b.classList.remove('drop-target'));
     });
-    // 버블 위에 드래그 → 서브그룹 힌트
+    // 버블 위에 드래그 (합치기 힌트)
     el.addEventListener('dragover', e => {
-      e.preventDefault();
-      if (dragKw && dragKw !== el.dataset.kw) {
-        el.style.outline = '2px solid #f78166';
+      e.preventDefault(); e.stopPropagation();
+      if (dragKw && dragKw !== el.dataset.kw && el.dataset.gname) {
+        el.classList.add('drop-target');
       }
     });
-    el.addEventListener('dragleave', () => { el.style.outline = ''; });
+    el.addEventListener('dragleave', () => el.classList.remove('drop-target'));
     el.addEventListener('drop', e => {
       e.preventDefault(); e.stopPropagation();
-      el.style.outline = '';
-      if (!dragKw || dragKw === el.dataset.kw) return;
-      // 어느 수동 그룹에 있는지 찾기
-      const sector = el.closest('.sector[data-manual]');
-      if (!sector) return;
-      const gname = sector.dataset.manual;
-      const mainKw = el.dataset.kw;
-      const subKw = dragKw;
-      const sg = getSubgroups();
-      if (!sg[gname]) sg[gname] = {};
-      if (!sg[gname][mainKw]) sg[gname][mainKw] = [];
-      if (!sg[gname][mainKw].includes(subKw)) sg[gname][mainKw].push(subKw);
-      setSubgroups(sg);
+      el.classList.remove('drop-target');
+      const masterKw = el.dataset.kw;
+      const gname = el.dataset.gname;
+      if (!dragKw || dragKw === masterKw || !gname) return;
+      // 합치기: dragKw를 masterKw의 alias로 등록
+      const m = getMerge();
+      if (!m[gname]) m[gname] = {};
+      if (!m[gname][masterKw]) m[gname][masterKw] = [];
+      if (!m[gname][masterKw].includes(dragKw)) m[gname][masterKw].push(dragKw);
+      setMerge(m);
       render();
     });
     el.addEventListener('click', e => {
       if (e.target.classList.contains('rm')) return;
-      if (e.target.classList.contains('kw-name-editable')) return;
-      showModal(el.dataset.kw);
+      if (e.target.classList.contains('kw-name-edit')) return;
+      showModal(el.dataset.kw, el.dataset.gname);
     });
   });
 
@@ -458,86 +434,58 @@ function render() {
       if (!g[gname].keywords.includes(dragKw)) {
         g[gname].keywords.push(dragKw);
         setGroups(g);
-        // dismissed 해제
-        const d = getDismissed(); delete d[dragKw]; setDismissed(d);
+        const d = getDism(); delete d[dragKw]; setDism(d);
         render();
       }
     });
   });
 }
 
-function sgOver(e, el) { e.preventDefault(); el.classList.add('drag-over'); }
-function sgLeave(el) { el.classList.remove('drag-over'); }
-function sgDrop(e, gname, mainKw) {
-  e.preventDefault(); e.stopPropagation();
-  document.querySelectorAll('.kw-subgroup').forEach(el => el.classList.remove('drag-over'));
-  if (!dragKw || dragKw === mainKw) return;
-  const sg = getSubgroups();
-  if (!sg[gname]) sg[gname] = {};
-  if (!sg[gname][mainKw]) sg[gname][mainKw] = [];
-  if (!sg[gname][mainKw].includes(dragKw)) sg[gname][mainKw].push(dragKw);
-  setSubgroups(sg);
-  render();
-}
-
-function renderGroupFilterBtns(groups, filtered, dismissed) {
-  const container = document.getElementById('group-filter-btns');
-  let html = `<button class="group-filter-btn ${!groupFilter?'active':''}"
+function renderGroupFilterBtns(groups) {
+  const c = document.getElementById('group-filter-btns');
+  let h = `<button class="group-filter-btn ${!groupFilter?'active':''}"
     style="color:#8b949e;border:1px solid #30363d;border-radius:20px;background:${!groupFilter?'#21262d':'transparent'}"
     onclick="setGroupFilter(null)">전체보기</button>`;
   Object.entries(groups).forEach(([gname, gdata]) => {
-    const color = gdata.color;
-    html += `<button class="group-filter-btn ${groupFilter===gname?'active':''}"
-      style="color:${color};border:1px solid ${color}66;border-radius:20px;background:${groupFilter===gname?color+'22':'transparent'}"
+    const col = gdata.color;
+    h += `<button class="group-filter-btn ${groupFilter===gname?'active':''}"
+      style="color:${col};border:1px solid ${col}66;border-radius:20px;background:${groupFilter===gname?col+'22':'transparent'}"
       onclick="setGroupFilter('${escJ(gname)}')">${gname}</button>`;
   });
-  if (!groupFilter || groupFilter === '기타') {
-    html += `<button class="group-filter-btn ${groupFilter==='기타'?'active':''}"
-      style="color:#8b949e;border:1px solid #30363d;border-radius:20px;background:${groupFilter==='기타'?'#21262d':'transparent'}"
-      onclick="setGroupFilter('기타')">기타</button>`;
-  }
-  container.innerHTML = html;
+  h += `<button class="group-filter-btn ${groupFilter==='기타'?'active':''}"
+    style="color:#8b949e;border:1px solid #30363d;border-radius:20px;background:${groupFilter==='기타'?'#21262d':'transparent'}"
+    onclick="setGroupFilter('기타')">기타</button>`;
+  c.innerHTML = h;
 }
 
 function setGroupFilter(g) { groupFilter = g; render(); }
 
-// 키워드 이름 변경
-function renameKw(original, el) {
+// 키워드 이름 변경 → 같은 이름이면 alias로 자동 합산 (표시만, DB는 안 바꿈)
+function onRename(original, el) {
   const newName = el.textContent.trim();
-  if (!newName || newName === getDisplayName(original)) return;
-  const r = getRenames();
-  r[original] = newName;
-  setRenames(r);
-}
-
-function dismissKw(kwName) {
-  const d = getDismissed(); d[kwName] = true; setDismissed(d); render();
-}
-
-function removeFromManual(gname, kwName) {
-  const g = getGroups();
-  if (!g[gname]) return;
-  g[gname].keywords = g[gname].keywords.filter(k => k !== kwName);
-  setGroups(g);
-  // 서브그룹에서도 제거
-  const sg = getSubgroups();
-  if (sg[gname]) {
-    delete sg[gname][kwName];
-    Object.keys(sg[gname]).forEach(mk => {
-      sg[gname][mk] = sg[gname][mk].filter(k => k !== kwName);
-    });
-    setSubgroups(sg);
-  }
-  const stillInManual = Object.values(g).some(gd => gd.keywords.includes(kwName));
-  if (!stillInManual) { const d = getDismissed(); d[kwName] = true; setDismissed(d); }
+  if (!newName || newName === dispName(original)) return;
+  const a = getAlias();
+  a[original] = newName;
+  setAlias(a);
   render();
 }
 
-function removeFromSubgroup(gname, mainKw, subKw) {
-  const sg = getSubgroups();
-  if (!sg[gname]?.[mainKw]) return;
-  sg[gname][mainKw] = sg[gname][mainKw].filter(k => k !== subKw);
-  setSubgroups(sg);
+function dismissKw(kw) { const d = getDism(); d[kw] = true; setDism(d); render(); }
+
+function removeFromManual(gname, kw) {
+  const g = getGroups();
+  if (!g[gname]) return;
+  g[gname].keywords = g[gname].keywords.filter(k => k !== kw);
+  setGroups(g);
+  // merge에서도 제거
+  const m = getMerge();
+  if (m[gname]) {
+    delete m[gname][kw];
+    Object.keys(m[gname]).forEach(mk => { m[gname][mk] = m[gname][mk].filter(k => k !== kw); });
+    setMerge(m);
+  }
+  const stillIn = Object.values(g).some(gd => gd.keywords.includes(kw));
+  if (!stillIn) { const d = getDism(); d[kw] = true; setDism(d); }
   render();
 }
 
@@ -556,17 +504,20 @@ function addGroup() {
 function deleteGroup(name) {
   if (!confirm(`"${name}" 그룹을 삭제할까요?`)) return;
   const g = getGroups(); delete g[name]; setGroups(g);
-  const sg = getSubgroups(); delete sg[name]; setSubgroups(sg);
+  const m = getMerge(); delete m[name]; setMerge(m);
   render();
 }
 
-function showModal(name) {
+function showModal(name, gname) {
   const kw = allKws.find(k => k.name === name);
   if (!kw) return;
-  const displayName = getDisplayName(name);
-  document.getElementById('modal-title').innerHTML = `<span style="color:#58a6ff">#</span> ${displayName}`;
-  document.getElementById('modal-meta').textContent = `${kw.count}회 언급 · ${kw.articles.length}건`;
-  document.getElementById('modal-body').innerHTML = kw.articles.map(a => `
+  const count = gname ? mergedCount(gname, name) : kw.count;
+  const arts  = gname ? mergedArticles(gname, name) : kw.articles;
+  const aliases = gname ? (getMerge()[gname]?.[name] || []) : [];
+  const aliasLabel = aliases.length ? ` (+${aliases.map(dispName).join(', ')})` : '';
+  document.getElementById('modal-title').innerHTML = `<span style="color:#58a6ff">#</span> ${dispName(name)}${aliasLabel}`;
+  document.getElementById('modal-meta').textContent = `${count}회 언급 · ${arts.length}건`;
+  document.getElementById('modal-body').innerHTML = arts.map(a => `
     <div class="news-card">
       <div class="card-title">${a.url?`<a href="${a.url}" target="_blank">🔗 ${a.title}</a>`:a.title}</div>
       <div class="card-date">📅 ${a.date}</div>
