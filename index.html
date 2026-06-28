@@ -20,7 +20,6 @@ header h1 { font-size:16px; font-weight:700; }
 .stat .num { font-size:18px; font-weight:700; color:#58a6ff; }
 .stat .label { font-size:11px; color:#8b949e; }
 
-/* 툴바 */
 #toolbar {
   padding:8px 20px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;
   border-bottom:1px solid #21262d;
@@ -47,7 +46,6 @@ header h1 { font-size:16px; font-weight:700; }
 #search:focus { border-color:#58a6ff; }
 .sep { width:1px; height:18px; background:#21262d; flex-shrink:0; }
 
-/* 그룹 추가 바 */
 #add-group-bar {
   padding:7px 20px; display:flex; gap:6px; align-items:center;
   border-bottom:1px solid #21262d; background:#0a0d12;
@@ -65,7 +63,6 @@ header h1 { font-size:16px; font-weight:700; }
 }
 #new-group-btn:hover { background:#2ea043; }
 
-/* 히트맵 */
 #heatmap {
   margin:12px 20px;
   display:flex; flex-wrap:wrap; gap:8px;
@@ -73,7 +70,7 @@ header h1 { font-size:16px; font-weight:700; }
 }
 
 .sector {
-  border:1px solid #30363d; border-radius:8px; overflow:hidden; flex-shrink:0; min-width:110px;
+  border:1px solid #30363d; border-radius:8px; overflow:hidden; flex-shrink:0;
 }
 .sector.manual-sector { border-style:dashed; border-width:1.5px; }
 .sector.drag-over { background:#1c2128 !important; outline:2px dashed #58a6ff; outline-offset:-2px; }
@@ -81,17 +78,22 @@ header h1 { font-size:16px; font-weight:700; }
 .sector-label {
   padding:5px 8px; font-size:10px; font-weight:700; letter-spacing:0.4px;
   text-transform:uppercase; border-bottom:1px solid #21262d;
-  display:flex; align-items:center; gap:5px;
-  background:#0a0d12; user-select:none;
+  display:flex; align-items:center; gap:5px; background:#0a0d12; user-select:none;
 }
 .label-text { flex:1; }
 .sector-count { opacity:.5; font-weight:400; }
 .sector-del { background:none; border:none; color:#30363d; cursor:pointer; font-size:10px; padding:0 2px; }
 .sector-del:hover { color:#f85149; }
 
+/* 기타 섹터 - 그리드 레이아웃 */
 .sector-body {
-  padding:6px; display:flex; flex-wrap:wrap; gap:5px;
-  min-height:52px; align-content:flex-start;
+  padding:8px; display:flex; flex-wrap:wrap; gap:6px;
+  align-content:flex-start;
+}
+.sector-body.grid-layout {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(70px, 1fr));
+  gap:5px;
 }
 .sector-body .empty-hint { font-size:11px; color:#30363d; padding:4px; align-self:center; }
 
@@ -103,7 +105,7 @@ header h1 { font-size:16px; font-weight:700; }
 }
 .bubble:hover { filter:brightness(1.2); transform:scale(1.05); z-index:10; }
 .bubble.dragging { opacity:0.3; cursor:grabbing; }
-.bubble .kw-name { display:block; pointer-events:none; }
+.bubble .kw-name { display:block; pointer-events:none; word-break:keep-all; }
 .bubble .kw-count { display:block; opacity:0.7; pointer-events:none; }
 .bubble .rm {
   display:none; position:absolute; top:-4px; right:-4px;
@@ -113,7 +115,30 @@ header h1 { font-size:16px; font-weight:700; }
 }
 .bubble:hover .rm { display:block; }
 
-/* 드래그 힌트 */
+/* 키워드 서브그룹 (버블 안에 버블 묶음) */
+.kw-subgroup {
+  border:1px dashed rgba(255,255,255,0.2); border-radius:6px;
+  padding:4px; display:flex; flex-wrap:wrap; gap:4px;
+  position:relative; cursor:default;
+}
+.kw-subgroup-label {
+  position:absolute; top:-8px; left:6px;
+  font-size:9px; color:rgba(255,255,255,0.5);
+  background:#0d1117; padding:0 3px;
+}
+.kw-subgroup.drag-over { background:rgba(255,255,255,0.05); }
+
+/* 키워드 이름 편집 */
+.bubble .kw-name-editable {
+  display:block; pointer-events:all; cursor:text;
+  outline:none; border-bottom:1px solid transparent;
+  min-width:20px;
+}
+.bubble .kw-name-editable:focus {
+  border-bottom:1px solid rgba(255,255,255,0.5);
+  background:rgba(0,0,0,0.2); border-radius:2px; padding:0 2px;
+}
+
 #drag-hint {
   display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
   background:#161b22; border:1px solid #58a6ff; border-radius:8px;
@@ -167,7 +192,7 @@ header h1 { font-size:16px; font-weight:700; }
   <button class="filter-btn" onclick="setCountFilter('top60',this)">TOP 60</button>
   <input id="search" type="text" placeholder="키워드 검색..." oninput="render()">
   <div class="sep"></div>
-  <div id="group-filter-btns"></div>
+  <div id="group-filter-btns" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
 </div>
 
 <div id="add-group-bar">
@@ -178,7 +203,7 @@ header h1 { font-size:16px; font-weight:700; }
 </div>
 
 <div id="heatmap"></div>
-<div id="drag-hint">🎯 수동 그룹 섹터에 드롭하세요</div>
+<div id="drag-hint">🎯 섹터에 드롭 or 버블 위에 드롭하면 서브그룹!</div>
 
 <div id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div id="modal">
@@ -191,20 +216,26 @@ header h1 { font-size:16px; font-weight:700; }
 </div>
 
 <script>
-const LS = 'ntt_v3';
+const LS = 'ntt_v4';
+const LS_DISMISSED = 'ntt_dismissed_v4';
+const LS_SUBGROUPS = 'ntt_subgroups_v1'; // { groupName: { mainKw: [subKws] } }
+const LS_RENAMES = 'ntt_renames_v1'; // { originalName: displayName }
+
 let DB = {};
 let allKws = [];
 let countFilter = 'all';
-let groupFilter = null; // null = 전체
+let groupFilter = null;
 let dragKw = null;
-// 수동으로 특정 그룹에서 제거된 키워드 → 기타로 강제 이동
-// dismissed[kwName] = true 이면 자동그룹 무시하고 기타로
-const LS_DISMISSED = 'ntt_dismissed_v3';
+let dragOverBubble = null; // 버블 위에 드래그 중인 대상
 
-function getDismissed() { try { return JSON.parse(localStorage.getItem(LS_DISMISSED)) || {}; } catch { return {}; } }
-function setDismissed(d) { localStorage.setItem(LS_DISMISSED, JSON.stringify(d)); }
 function getGroups() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; } }
 function setGroups(g) { localStorage.setItem(LS, JSON.stringify(g)); }
+function getDismissed() { try { return JSON.parse(localStorage.getItem(LS_DISMISSED)) || {}; } catch { return {}; } }
+function setDismissed(d) { localStorage.setItem(LS_DISMISSED, JSON.stringify(d)); }
+function getSubgroups() { try { return JSON.parse(localStorage.getItem(LS_SUBGROUPS)) || {}; } catch { return {}; } }
+function setSubgroups(s) { localStorage.setItem(LS_SUBGROUPS, JSON.stringify(s)); }
+function getRenames() { try { return JSON.parse(localStorage.getItem(LS_RENAMES)) || {}; } catch { return {}; } }
+function setRenames(r) { localStorage.setItem(LS_RENAMES, JSON.stringify(r)); }
 
 async function init() {
   try {
@@ -215,7 +246,7 @@ async function init() {
     document.getElementById('stat-keywords').textContent = DB.total_keywords;
     document.getElementById('updated-at').textContent = '업데이트: ' + DB.updated_at;
     allKws = Object.entries(DB.keywords || {})
-      .map(([name, d]) => ({ name, count: d.count, autoGroup: d.group, articles: d.articles }))
+      .map(([name, d]) => ({ name, count: d.count, articles: d.articles }))
       .sort((a, b) => b.count - a.count);
     render();
   } catch {
@@ -224,22 +255,15 @@ async function init() {
   }
 }
 
-// 키워드의 실제 그룹 계산
-// 우선순위: 수동그룹 포함 > dismissed면 기타 > 자동그룹
-function resolveGroup(kw, groups, dismissed) {
-  // 수동 그룹에 포함되어 있으면 해당 그룹들 반환 (중복 가능)
-  const manualGroups = Object.entries(groups)
-    .filter(([, gd]) => gd.keywords.includes(kw.name))
-    .map(([gname]) => gname);
-  if (manualGroups.length) return { type: 'manual', groups: manualGroups };
-  if (dismissed[kw.name]) return { type: 'auto', group: '기타' };
-  return { type: 'auto', group: kw.autoGroup || '기타' };
+function getDisplayName(name) {
+  const renames = getRenames();
+  return renames[name] || name;
 }
 
 function getFiltered() {
   let kws = [...allKws];
   const q = document.getElementById('search').value.trim();
-  if (q) kws = kws.filter(k => k.name.includes(q));
+  if (q) kws = kws.filter(k => k.name.includes(q) || getDisplayName(k.name).includes(q));
   if (countFilter === 'top30') kws = kws.slice(0, 30);
   if (countFilter === 'top60') kws = kws.slice(0, 60);
   return kws;
@@ -252,9 +276,13 @@ function setCountFilter(t, btn) {
   render();
 }
 
-function setGroupFilter(g) {
-  groupFilter = groupFilter === g ? null : g;
-  render();
+function resolveGroup(kw, groups, dismissed) {
+  const manualGroups = Object.entries(groups)
+    .filter(([, gd]) => gd.keywords.includes(kw.name))
+    .map(([gname]) => gname);
+  if (manualGroups.length) return { type: 'manual', groups: manualGroups };
+  if (dismissed[kw.name]) return { type: 'auto', group: '기타' };
+  return { type: 'auto', group: '기타' };
 }
 
 function render() {
@@ -262,101 +290,111 @@ function render() {
   const filtered = getFiltered();
   const groups = getGroups();
   const dismissed = getDismissed();
-  const autoColors = DB.group_colors || {};
+  const subgroups = getSubgroups();
+  const renames = getRenames();
 
   const maxC = allKws[0]?.count || 1;
   const minC = allKws[allKws.length - 1]?.count || 1;
 
-  // 그룹 필터 버튼 렌더
-  renderGroupFilterBtns(groups, autoColors, filtered, dismissed);
+  // 그룹 필터 버튼
+  renderGroupFilterBtns(groups, filtered, dismissed);
 
-  // 섹터별 키워드 분류
-  // autoSectors: { groupName: [kw, ...] }
-  // manualSectors: { groupName: [kw, ...] }
-  const autoSectors = {};
+  // 섹터별 분류
   const manualSectors = {};
-
   Object.keys(groups).forEach(g => { manualSectors[g] = []; });
+
+  const etcKws = [];
 
   filtered.forEach(kw => {
     const resolved = resolveGroup(kw, groups, dismissed);
     if (resolved.type === 'manual') {
-      resolved.groups.forEach(g => {
-        if (manualSectors[g]) manualSectors[g].push(kw);
-      });
-      // 수동 그룹에 있으면 자동 섹터에는 안 넣음
+      resolved.groups.forEach(g => { if (manualSectors[g]) manualSectors[g].push(kw); });
     } else {
-      const g = resolved.group;
-      if (!autoSectors[g]) autoSectors[g] = [];
-      autoSectors[g].push(kw);
+      etcKws.push(kw);
     }
   });
 
-  // groupFilter 적용
-  let html = '';
-
-  const renderBubble = (kw, color, removable, removeAction) => {
+  function renderBubble(kw, color, removable, removeAction, inSubgroup) {
     const ratio = maxC === minC ? 0.5 : (kw.count - minC) / (maxC - minC);
-    const size = Math.round(52 + ratio * 90);
-    const fs = Math.round(9 + ratio * 6);
-    const cfs = Math.round(fs * 0.72);
+    // 기타 섹터는 고정 작은 크기, 그룹 섹터는 비율 크기
+    const size = inSubgroup ? 52 : Math.round(52 + ratio * 80);
+    const fs = inSubgroup ? 9 : Math.round(9 + ratio * 5);
+    const cfs = Math.round(fs * 0.75);
     const alpha = Math.round(35 + ratio * 60).toString(16).padStart(2, '0');
-    const rm = removable
-      ? `<span class="rm" onclick="${removeAction}">✕</span>` : '';
+    const rm = removable ? `<span class="rm" onclick="${removeAction}">✕</span>` : '';
+    const displayName = getDisplayName(kw.name);
     return `<div class="bubble" data-kw="${escJ(kw.name)}" draggable="true"
       style="width:${size}px;height:${size}px;font-size:${fs}px;
              background:${color+alpha};border:1.5px solid ${color}88;color:#e6edf3;">
       ${rm}
       <div>
-        <span class="kw-name">${kw.name}</span>
+        <span class="kw-name-editable" contenteditable="true"
+          onblur="renameKw('${escJ(kw.name)}',this)"
+          onclick="event.stopPropagation()"
+          ondblclick="event.stopPropagation()">${displayName}</span>
         <span class="kw-count" style="font-size:${cfs}px">${kw.count}회</span>
       </div>
     </div>`;
-  };
+  }
 
-  const renderSector = (id, label, color, kws, isManual) => {
+  function renderSector(label, color, kws, isManual) {
     if (groupFilter && groupFilter !== label) return '';
-    const bubblesHtml = kws.map(kw => {
-      if (isManual) {
-        return renderBubble(kw, color, true, `removeFromManual('${escJ(label)}','${escJ(kw.name)}')`);
-      } else {
-        // 기타가 아닌 자동 그룹은 삭제 가능 (→기타로)
-        const canRemove = label !== '기타';
-        return renderBubble(kw, color, canRemove, `dismissKw('${escJ(kw.name)}')`);
-      }
-    }).join('');
-    const delBtn = isManual
-      ? `<button class="sector-del" onclick="deleteGroup('${escJ(label)}')">✕</button>` : '';
+
+    // 수동 그룹에서 서브그룹 처리
+    let bodyContent = '';
+    if (isManual) {
+      const sg = subgroups[label] || {};
+      const assignedToSub = new Set(Object.values(sg).flat());
+      const mainKws = kws.filter(k => !assignedToSub.has(k.name));
+      
+      // 일반 버블
+      bodyContent += mainKws.map(kw => {
+        return renderBubble(kw, color, true, `removeFromManual('${escJ(label)}','${escJ(kw.name)}')`, false);
+      }).join('');
+
+      // 서브그룹
+      Object.entries(sg).forEach(([mainKw, subKwNames]) => {
+        const mainKwObj = kws.find(k => k.name === mainKw);
+        if (!mainKwObj) return;
+        const subKwObjs = subKwNames.map(n => kws.find(k => k.name === n)).filter(Boolean);
+        if (!subKwObjs.length) return;
+
+        bodyContent += `<div class="kw-subgroup" data-group="${escJ(label)}" data-main="${escJ(mainKw)}"
+          ondragover="sgOver(event,this)" ondragleave="sgLeave(this)" ondrop="sgDrop(event,'${escJ(label)}','${escJ(mainKw)}')">
+          <span class="kw-subgroup-label">${getDisplayName(mainKw)}</span>
+          ${renderBubble(mainKwObj, color, true, `removeFromManual('${escJ(label)}','${escJ(mainKw)}')`, true)}
+          ${subKwObjs.map(k => renderBubble(k, color, true, `removeFromSubgroup('${escJ(label)}','${escJ(mainKw)}','${escJ(k.name)}')`, true)).join('')}
+        </div>`;
+      });
+    } else {
+      // 기타 섹터 - 그리드
+      bodyContent = kws.map(kw => renderBubble(kw, color, label !== '기타', `dismissKw('${escJ(kw.name)}')`, false)).join('');
+    }
+
+    const delBtn = isManual ? `<button class="sector-del" onclick="deleteGroup('${escJ(label)}')">✕</button>` : '';
     const droppable = isManual ? `data-manual="${escJ(label)}"` : '';
-    return `<div class="sector ${isManual?'manual-sector':''}" ${droppable}
-      style="border-color:${color}${isManual?'':'44'}">
+    const gridClass = label === '기타' ? 'grid-layout' : '';
+    const minW = label === '기타' ? 'min-width:calc(100vw - 40px)' : 'min-width:110px';
+
+    return `<div class="sector ${isManual?'manual-sector':''}" ${droppable} style="border-color:${color}${isManual?'':'44'};${minW}">
       <div class="sector-label" style="color:${color}">
         <span class="label-text">${label}</span>
         <span class="sector-count">${kws.length}</span>
         ${delBtn}
       </div>
-      <div class="sector-body">
-        ${kws.length ? bubblesHtml : '<span class="empty-hint">드래그해서 추가</span>'}
+      <div class="sector-body ${gridClass}" style="${label==='기타'?'max-height:320px;overflow-y:auto;':''}">
+        ${bodyContent || (isManual ? '<span class="empty-hint">드래그해서 추가</span>' : '')}
       </div>
     </div>`;
-  };
+  }
 
-  // 자동 섹터 (기타 제외 먼저)
-  const autoOrder = Object.keys(autoSectors).filter(g => g !== '기타');
-  autoOrder.forEach(g => {
-    const color = autoColors[g] || '#8b949e';
-    html += renderSector(g, g, color, autoSectors[g], false);
-  });
-
-  // 수동 섹터
+  let html = '';
   Object.entries(manualSectors).forEach(([g, kws]) => {
     const color = groups[g]?.color || '#58a6ff';
-    html += renderSector(g, g, color, kws, true);
+    html += renderSector(g, color, kws, true);
   });
-
-  // 기타 섹터 (맨 마지막)
-  if (autoSectors['기타']?.length && (!groupFilter || groupFilter === '기타')) {
-    html += renderSector('기타', '기타', '#8b949e', autoSectors['기타'], false);
+  if (etcKws.length && (!groupFilter || groupFilter === '기타')) {
+    html += renderSector('기타', '#8b949e', etcKws, false);
   }
 
   hm.innerHTML = html || '<div style="padding:40px;color:#8b949e;text-align:center">키워드가 없어요.</div>';
@@ -373,9 +411,36 @@ function render() {
       dragKw = null;
       el.classList.remove('dragging');
       document.getElementById('drag-hint').style.display = 'none';
+      hm.querySelectorAll('.bubble.drop-target').forEach(b => b.classList.remove('drop-target'));
+    });
+    // 버블 위에 드래그 → 서브그룹 힌트
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (dragKw && dragKw !== el.dataset.kw) {
+        el.style.outline = '2px solid #f78166';
+      }
+    });
+    el.addEventListener('dragleave', () => { el.style.outline = ''; });
+    el.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      el.style.outline = '';
+      if (!dragKw || dragKw === el.dataset.kw) return;
+      // 어느 수동 그룹에 있는지 찾기
+      const sector = el.closest('.sector[data-manual]');
+      if (!sector) return;
+      const gname = sector.dataset.manual;
+      const mainKw = el.dataset.kw;
+      const subKw = dragKw;
+      const sg = getSubgroups();
+      if (!sg[gname]) sg[gname] = {};
+      if (!sg[gname][mainKw]) sg[gname][mainKw] = [];
+      if (!sg[gname][mainKw].includes(subKw)) sg[gname][mainKw].push(subKw);
+      setSubgroups(sg);
+      render();
     });
     el.addEventListener('click', e => {
       if (e.target.classList.contains('rm')) return;
+      if (e.target.classList.contains('kw-name-editable')) return;
       showModal(el.dataset.kw);
     });
   });
@@ -383,9 +448,7 @@ function render() {
   // 수동 섹터 드롭
   hm.querySelectorAll('.sector[data-manual]').forEach(sec => {
     sec.addEventListener('dragover', e => { e.preventDefault(); sec.classList.add('drag-over'); });
-    sec.addEventListener('dragleave', e => {
-      if (!sec.contains(e.relatedTarget)) sec.classList.remove('drag-over');
-    });
+    sec.addEventListener('dragleave', e => { if (!sec.contains(e.relatedTarget)) sec.classList.remove('drag-over'); });
     sec.addEventListener('drop', e => {
       e.preventDefault(); sec.classList.remove('drag-over');
       if (!dragKw) return;
@@ -395,74 +458,86 @@ function render() {
       if (!g[gname].keywords.includes(dragKw)) {
         g[gname].keywords.push(dragKw);
         setGroups(g);
+        // dismissed 해제
+        const d = getDismissed(); delete d[dragKw]; setDismissed(d);
         render();
       }
     });
   });
 }
 
-function renderGroupFilterBtns(groups, autoColors, filtered, dismissed) {
-  const container = document.getElementById('group-filter-btns');
-  const autoGroupNames = [...new Set(filtered.map(k => {
-    const r = resolveGroup(k, groups, dismissed);
-    return r.type === 'auto' ? r.group : null;
-  }).filter(Boolean))].filter(g => g !== '기타');
+function sgOver(e, el) { e.preventDefault(); el.classList.add('drag-over'); }
+function sgLeave(el) { el.classList.remove('drag-over'); }
+function sgDrop(e, gname, mainKw) {
+  e.preventDefault(); e.stopPropagation();
+  document.querySelectorAll('.kw-subgroup').forEach(el => el.classList.remove('drag-over'));
+  if (!dragKw || dragKw === mainKw) return;
+  const sg = getSubgroups();
+  if (!sg[gname]) sg[gname] = {};
+  if (!sg[gname][mainKw]) sg[gname][mainKw] = [];
+  if (!sg[gname][mainKw].includes(dragKw)) sg[gname][mainKw].push(dragKw);
+  setSubgroups(sg);
+  render();
+}
 
-  let html = '';
-  autoGroupNames.forEach(g => {
-    const color = autoColors[g] || '#8b949e';
-    html += `<button class="group-filter-btn ${groupFilter===g?'active':''}"
-      style="color:${color};border-color:${color}66;background:${color}${groupFilter===g?'22':'11'}"
-      onclick="setGroupFilter('${escJ(g)}')">${g}</button>`;
-  });
+function renderGroupFilterBtns(groups, filtered, dismissed) {
+  const container = document.getElementById('group-filter-btns');
+  let html = `<button class="group-filter-btn ${!groupFilter?'active':''}"
+    style="color:#8b949e;border:1px solid #30363d;border-radius:20px;background:${!groupFilter?'#21262d':'transparent'}"
+    onclick="setGroupFilter(null)">전체보기</button>`;
   Object.entries(groups).forEach(([gname, gdata]) => {
     const color = gdata.color;
     html += `<button class="group-filter-btn ${groupFilter===gname?'active':''}"
-      style="color:${color};border-color:${color}66;background:${color}${groupFilter===gname?'22':'11'}"
+      style="color:${color};border:1px solid ${color}66;border-radius:20px;background:${groupFilter===gname?color+'22':'transparent'}"
       onclick="setGroupFilter('${escJ(gname)}')">${gname}</button>`;
   });
-  if (Object.values(groups).some(g => g) || autoGroupNames.length) {
-    html = `<button class="group-filter-btn ${!groupFilter?'active':''}"
-      style="color:#8b949e;border-color:#30363d;background:${!groupFilter?'#21262d':'transparent'}"
-      onclick="setGroupFilter(null)">전체보기</button>` + html;
+  if (!groupFilter || groupFilter === '기타') {
+    html += `<button class="group-filter-btn ${groupFilter==='기타'?'active':''}"
+      style="color:#8b949e;border:1px solid #30363d;border-radius:20px;background:${groupFilter==='기타'?'#21262d':'transparent'}"
+      onclick="setGroupFilter('기타')">기타</button>`;
   }
   container.innerHTML = html;
 }
 
-// 자동 분류에서 제거 → 기타로
-function dismissKw(kwName) {
-  const d = getDismissed();
-  d[kwName] = true;
-  setDismissed(d);
-  render();
+function setGroupFilter(g) { groupFilter = g; render(); }
+
+// 키워드 이름 변경
+function renameKw(original, el) {
+  const newName = el.textContent.trim();
+  if (!newName || newName === getDisplayName(original)) return;
+  const r = getRenames();
+  r[original] = newName;
+  setRenames(r);
 }
 
-// 수동 그룹에서 제거 → 기타로
+function dismissKw(kwName) {
+  const d = getDismissed(); d[kwName] = true; setDismissed(d); render();
+}
+
 function removeFromManual(gname, kwName) {
   const g = getGroups();
   if (!g[gname]) return;
   g[gname].keywords = g[gname].keywords.filter(k => k !== kwName);
   setGroups(g);
-  // 다른 수동 그룹에도 없으면 dismissed 처리
-  const stillInManual = Object.values(g).some(gd => gd.keywords.includes(kwName));
-  if (!stillInManual) {
-    const d = getDismissed();
-    d[kwName] = true;
-    setDismissed(d);
+  // 서브그룹에서도 제거
+  const sg = getSubgroups();
+  if (sg[gname]) {
+    delete sg[gname][kwName];
+    Object.keys(sg[gname]).forEach(mk => {
+      sg[gname][mk] = sg[gname][mk].filter(k => k !== kwName);
+    });
+    setSubgroups(sg);
   }
+  const stillInManual = Object.values(g).some(gd => gd.keywords.includes(kwName));
+  if (!stillInManual) { const d = getDismissed(); d[kwName] = true; setDismissed(d); }
   render();
 }
 
-// 수동 그룹에 드롭 시 dismissed 해제
-function addToManual(gname, kwName) {
-  const g = getGroups();
-  if (!g[gname] || g[gname].keywords.includes(kwName)) return;
-  g[gname].keywords.push(kwName);
-  setGroups(g);
-  // dismissed 해제
-  const d = getDismissed();
-  delete d[kwName];
-  setDismissed(d);
+function removeFromSubgroup(gname, mainKw, subKw) {
+  const sg = getSubgroups();
+  if (!sg[gname]?.[mainKw]) return;
+  sg[gname][mainKw] = sg[gname][mainKw].filter(k => k !== subKw);
+  setSubgroups(sg);
   render();
 }
 
@@ -480,19 +555,17 @@ function addGroup() {
 
 function deleteGroup(name) {
   if (!confirm(`"${name}" 그룹을 삭제할까요?`)) return;
-  const g = getGroups();
-  delete g[name];
-  setGroups(g);
+  const g = getGroups(); delete g[name]; setGroups(g);
+  const sg = getSubgroups(); delete sg[name]; setSubgroups(sg);
   render();
 }
 
 function showModal(name) {
   const kw = allKws.find(k => k.name === name);
   if (!kw) return;
-  const color = (DB.group_colors || {})[kw.autoGroup] || '#58a6ff';
-  document.getElementById('modal-title').innerHTML = `<span style="color:${color}">#</span> ${name}`;
-  document.getElementById('modal-meta').textContent =
-    `${kw.autoGroup || '미분류'} · ${kw.count}회 언급 · ${kw.articles.length}건`;
+  const displayName = getDisplayName(name);
+  document.getElementById('modal-title').innerHTML = `<span style="color:#58a6ff">#</span> ${displayName}`;
+  document.getElementById('modal-meta').textContent = `${kw.count}회 언급 · ${kw.articles.length}건`;
   document.getElementById('modal-body').innerHTML = kw.articles.map(a => `
     <div class="news-card">
       <div class="card-title">${a.url?`<a href="${a.url}" target="_blank">🔗 ${a.title}</a>`:a.title}</div>
