@@ -590,7 +590,7 @@ function removeFromManual(gname,kw){
     sBG(bgs);
   }
   const stillIn=Object.values(g).some(gd=>gd.keywords.includes(kw));
-  if(!stillIn){const d=gD();d[kw]=true;sD(d);}
+  if(!stillIn){const d=gD(); delete d[kw]; sD(d);}
   render();
 }
 
